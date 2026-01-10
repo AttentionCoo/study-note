@@ -3814,9 +3814,11 @@ ds.receive(dp);  // 数据会被填充到 bytes 数组中
 
 ![image-20250717230649886](../AppData/Roaming/Typora/typora-user-images/image-20250717230649886.png)
 
+#### 状态码
 
+![image-20250721205101020](../AppData/Roaming/Typora/typora-user-images/image-20250721205101020.png)
 
-### Servlet
+## Servlet
 
 #### 什么是Servlet
 
@@ -4173,93 +4175,11 @@ protected void doPost(HttpServletRequest req, HttpServletResponse resp) {
 
 
 
-### JSP
+## Filter和Listener
 
-#### 语法
+### 1.会话跟踪技术
 
-![image-20250721155157516](../AppData/Roaming/Typora/typora-user-images/image-20250721155157516.png)
-
-![image-20250721155936937](../AppData/Roaming/Typora/typora-user-images/image-20250721155936937.png)
-
-
-
-![image-20250721160334467](../AppData/Roaming/Typora/typora-user-images/image-20250721160334467.png)
-
-![image-20250721160725606](../AppData/Roaming/Typora/typora-user-images/image-20250721160725606.png)
-
-#### JSP原理
-
-![image-20250721162557606](../AppData/Roaming/Typora/typora-user-images/image-20250721162557606.png)
-
-#### JSP内置对象
-
-![image-20250721163635226](../AppData/Roaming/Typora/typora-user-images/image-20250721163635226.png)
-
-
-
-![image-20250721172652634](../AppData/Roaming/Typora/typora-user-images/image-20250721172652634.png)
-
-![image-20250721173040154](../AppData/Roaming/Typora/typora-user-images/image-20250721173040154.png)
-
-
-
-
-
-
-
-
-
-![image-20250721173014096](../AppData/Roaming/Typora/typora-user-images/image-20250721173014096.png)
-
-![image-20250721172952984](../AppData/Roaming/Typora/typora-user-images/image-20250721172952984.png)
-
-#### JSP指令
-
-![image-20250721203740911](../AppData/Roaming/Typora/typora-user-images/image-20250721203740911.png)
-
-![image-20250721204044999](../AppData/Roaming/Typora/typora-user-images/image-20250721204044999.png)
-
-![image-20250721204404641](../AppData/Roaming/Typora/typora-user-images/image-20250721204404641.png)
-
-#### 状态码
-
-![image-20250721205101020](../AppData/Roaming/Typora/typora-user-images/image-20250721205101020.png)
-
-#### EL表达式
-
-![image-20250721211754250](../AppData/Roaming/Typora/typora-user-images/image-20250721211754250.png)
-
-![image-20250721214116681](../AppData/Roaming/Typora/typora-user-images/image-20250721214116681.png)
-
-![image-20250721214340771](../AppData/Roaming/Typora/typora-user-images/image-20250721214340771.png)
-
-![image-20250721220009262](../AppData/Roaming/Typora/typora-user-images/image-20250721220009262.png)
-
-![image-20250721220759551](../AppData/Roaming/Typora/typora-user-images/image-20250721220759551.png)
-
-#### JSTL数据库
-
-![image-20250722173843037](../AppData/Roaming/Typora/typora-user-images/image-20250722173843037.png)
-
-![image-20250722173932045](../AppData/Roaming/Typora/typora-user-images/image-20250722173932045.png)
-
-![image-20250722182826903](../AppData/Roaming/Typora/typora-user-images/image-20250722182826903.png)
-
-![image-20250722183046165](../AppData/Roaming/Typora/typora-user-images/image-20250722183046165.png)
-
-![image-20250722183305212](../AppData/Roaming/Typora/typora-user-images/image-20250722183305212.png)
-
-![image-20250722184941672](../AppData/Roaming/Typora/typora-user-images/image-20250722184941672.png)
-
-![image-20250722185508820](../AppData/Roaming/Typora/typora-user-images/image-20250722185508820.png)
-
-![image-20250722185644461](../AppData/Roaming/Typora/typora-user-images/image-20250722185644461.png)
-
-### Filter和Listener
-
-#### 会话跟踪技术
-
-![image-20250722221428259](../AppData/Roaming/Typora/typora-user-images/image-20250722221428259.png)
+![](../AppData/Roaming/Typora/typora-user-images/image-20260102173702403.png)
 
 #### cookie
 
@@ -4343,7 +4263,7 @@ html
 
 ![image-20250723190744996](../AppData/Roaming/Typora/typora-user-images/image-20250723190744996.png)
 
-#### Filter
+### 2. Filter
 
 ##### 介绍
 
@@ -4367,7 +4287,7 @@ html
 
 ![image-20250723212056917](../AppData/Roaming/Typora/typora-user-images/image-20250723212056917.png)
 
-#### 监听器
+### 3. Listener
 
 ![image-20250723212304489](../AppData/Roaming/Typora/typora-user-images/image-20250723212304489.png)
 
@@ -4379,7 +4299,7 @@ html
 
 ![image-20250723213351241](../AppData/Roaming/Typora/typora-user-images/image-20250723213351241.png)
 
-#### MVC设计模式
+### 4. MVC设计模式
 
 ##### 介绍
 
@@ -4387,7 +4307,7 @@ html
 
 ![image-20250724203546723](../AppData/Roaming/Typora/typora-user-images/image-20250724203546723.png)
 
-#### 三层架构
+### 5. 三层架构
 
 ![image-20250724211824544](../AppData/Roaming/Typora/typora-user-images/image-20250724211824544.png)
 
@@ -4994,7 +4914,7 @@ constraint chk_phone_length check (char_length(phone) = 11)
 private LocalDate begin;
 ```
 
-#### 21.WebConfig
+#### 21.WebConfig(MVC)
 
 ![image-20250904215506470](../AppData/Roaming/Typora/typora-user-images/image-20250904215506470.png)
 
@@ -10075,6 +9995,17 @@ splitter = RecursiveCharacterTextSplitter(
 
 ### 4. 项目思路
 
+#### 4.1 重点
+
+```
+之前效果一直不好，提高的方法是：加入原始病人提问。
+这方法是从RNN想到的，因为RNN效果不好就是因为忽略了之前的信息，所以我联想到我的模型效果不好是不是也是因为它。然后加入之后效果变好了很多。
+```
+
+
+
+#### 4.2 详细
+
 基于多智能体对话的循环中，
 
 ```python
@@ -11985,7 +11916,7 @@ sudo docker exec -it mysql-guestbook mysql -u root -p
 
 这一步是在 MySQL 内部执行，不是在 Linux 终端执行！
 
-SOURCE /docker-entrypoint-initdb.d/guestBook.sql;
+SOURCE /docker-entrypoint-initdb.d/hmdp.sql;
 
 
 ```
@@ -13289,7 +13220,25 @@ java -Dserver.port=8090 -Dcsp.sentinel.dashboard.server=localhost:8090 -Dproject
 
 
 
-# Redis进阶
+# 黑马点评（Redis进阶）
+
+## 0. 前置
+
+```
+sudo mkdir -p /opt/mysql-hm-dp/data
+sudo chown -R 999:999 /opt/mysql-hm-dp/data  # MySQL 容器内部用户 UID/GID 通常为 999，确保权限正确
+
+docker run -d \
+  --name hm-dp \
+  -p 3310:3306 \
+  -e MYSQL_ROOT_PASSWORD=your_strong_password_here \
+  -e TZ=Asia/Shanghai \
+  -v /opt/mysql-hm-dp/data:/var/lib/mysql \
+  --restart=always \
+  mysql:latest
+```
+
+
 
 ## 1. 重要知识点
 
@@ -13298,6 +13247,323 @@ java -Dserver.port=8090 -Dcsp.sentinel.dashboard.server=localhost:8090 -Dproject
 ```redis
 redis-cli -a 你的密码
 ```
+
+### 1.2 cookie,session,token
+
+下面从**概念、工作机制、存储位置、安全性、典型使用场景**等维度，对 **Session、Cookie、Token、JWT** 进行系统性对比说明。这四者在实际系统中经常“组合使用”，但职责不同，理解边界非常重要。
+
+------
+
+#### 一、Cookie
+
+##### 1. 定义
+
+**Cookie 是浏览器端的一小段键值对数据**，由服务器通过 HTTP 响应头下发，之后浏览器会在每次请求时自动携带。
+
+##### 2. 工作流程
+
+1. 服务器在响应中返回 `Set-Cookie`
+2. 浏览器保存 Cookie
+3. 后续请求自动在请求头中携带 `Cookie`
+
+##### 3. 存储位置
+
+- **客户端（浏览器）**
+- 有大小限制（一般 ≤ 4KB）
+
+##### 4. 特点
+
+优点：
+
+- 自动携带（对服务器透明）
+- 机制简单、历史悠久
+
+缺点：
+
+- 易受 **CSRF**
+- 容易被窃取（XSS）
+- 不适合存储敏感信息
+
+##### 5. 常见用途
+
+- 保存 SessionID
+- 记住登录状态
+- 语言偏好、主题设置
+
+------
+
+#### 二、Session
+
+##### 1. 定义
+
+**Session 是服务器端保存的用户会话状态**，通常通过 Cookie 中的 **SessionID** 与客户端关联。
+
+##### 2. 工作流程
+
+1. 用户首次访问
+2. 服务器创建 Session（存内存 / Redis / 数据库）
+3. 返回 `SessionID` 给客户端（通常放在 Cookie 中）
+4. 客户端后续请求携带 SessionID
+5. 服务器根据 SessionID 查找会话数据
+
+##### 3. 存储位置
+
+- **服务端**
+- 客户端只保存 SessionID
+
+##### 4. 特点
+
+优点：
+
+- 安全性较高（敏感数据不在客户端）
+- 易于实现权限控制
+
+缺点：
+
+- **有状态**（不利于分布式/微服务）
+- 占用服务器资源
+- 需要 Session 同步或集中存储
+
+##### 5. 常见用途
+
+- 传统 Web 网站登录
+- 后台管理系统
+- 用户状态强依赖的系统
+
+------
+
+#### 三、Token（广义）
+
+##### 1. 定义
+
+**Token 是一种访问凭证字符串**，用于证明“你是谁 / 你有没有权限”。
+
+> Token 是一个**概念**，JWT 是 Token 的一种具体实现。
+
+##### 2. 工作方式
+
+1. 登录成功后服务器生成 Token
+
+2. 客户端保存 Token（localStorage / sessionStorage / Cookie）
+
+3. 每次请求在 Header 中携带：
+
+   ```
+   Authorization: Bearer <token>
+   ```
+
+4. 服务器校验 Token
+
+##### 3. 存储位置
+
+- 客户端（通常不自动携带）
+- Header 中显式传输
+
+##### 4. 特点
+
+优点：
+
+- **无状态（或弱状态）**
+- 适合前后端分离、微服务
+- 不依赖 Cookie
+
+缺点：
+
+- 一旦泄露难以失效（除非引入黑名单）
+- 需要自行设计刷新机制
+
+##### 5. 常见用途
+
+- 前后端分离项目
+- RESTful API
+- 移动端 / 小程序
+
+------
+
+#### 四、JWT（JSON Web Token）
+
+##### 1. 定义
+
+**JWT 是一种自包含的 Token 标准**（RFC 7519），由三部分组成：
+
+```
+Header.Payload.Signature
+```
+
+##### 2. 示例
+
+```json
+Header:    { "alg": "HS256", "typ": "JWT" }
+Payload:  { "userId": 1, "role": "admin", "exp": 1710000000 }
+Signature: HMACSHA256(...)
+```
+
+##### 3. 核心特性
+
+- **自包含**：Payload 中直接携带用户信息
+- **可验证**：通过签名防篡改
+- **可过期**：`exp` 字段
+
+⚠️ 注意：JWT **不是加密**，只是 Base64 编码
+
+##### 4. 存储位置
+
+- 客户端（LocalStorage / Cookie / 内存）
+- 请求 Header 中携带
+
+##### 5. 优缺点
+
+优点：
+
+- 服务端无需存储会话
+- 天然适合分布式系统
+- 跨服务、跨语言
+
+缺点：
+
+- Token 体积较大
+- 无法主动失效（需要额外机制）
+- 泄露风险高
+
+##### 6. 常见用途
+
+- 单点登录（SSO）
+- 微服务鉴权
+- API 网关认证
+
+------
+
+#### 五、核心区别对比表
+
+| 维度           | Cookie | Session           | Token  | JWT    |
+| -------------- | ------ | ----------------- | ------ | ------ |
+| 存储位置       | 客户端 | 服务端            | 客户端 | 客户端 |
+| 是否有状态     | 否     | 是                | 否     | 否     |
+| 自动携带       | 是     | 是（依赖 Cookie） | 否     | 否     |
+| 安全性         | 低     | 高                | 中     | 中     |
+| 适合分布式     | 否     | 较差              | 是     | 是     |
+| 数据是否自包含 | 否     | 否                | 看实现 | 是     |
+
+------
+
+#### 六、典型组合方式（非常重要）
+
+##### 1️⃣ Cookie + Session（传统 Web）
+
+```
+浏览器 --Cookie(SessionID)--> 服务端(Session)
+```
+
+适合：
+
+- 单体应用
+- 后台系统
+
+------
+
+##### 2️⃣ Token / JWT + Header（前后端分离）
+
+```
+前端 --Authorization: Bearer JWT--> API
+```
+
+适合：
+
+- Vue / React
+- 微服务
+- 移动端
+
+------
+
+##### 3️⃣ JWT + Refresh Token（工业级方案）
+
+- Access Token（短期）
+- Refresh Token（长期）
+- 支持主动失效和续期
+
+------
+
+#### 七、一句话总结
+
+- **Cookie**：客户端存储工具
+- **Session**：服务端会话状态
+- **Token**：身份凭证的抽象概念
+- **JWT**：无状态、自包含的 Token 标准实现
+
+
+
+### 1.3 MVC的拦截器
+
+```
+
+public class LoginInterceptor implements HandlerInterceptor {
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        // TODO 检查是否登录
+        Object user = request.getSession().getAttribute("user");
+        if (user == null) {
+            // 未登录，返回401状态码
+            response.setStatus(401);
+            return false;
+        }
+        UserHolder.saveUser((UserDTO) user);
+        return true;
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        // 移除用户
+        UserHolder.removeUser();
+    }
+}
+
+```
+
+### 1.4 对象生命周期角度（最核心）
+
+#### 1️⃣ 构造器注入：创建即完成
+
+```
+public class A {
+    private final B b;
+
+    public A(B b) {
+        this.b = b;
+    }
+}
+```
+
+Spring 的流程是：
+
+1. 先从容器中找到 `B`
+2. 调用 `new A(b)`
+3. **对象创建完成，且依赖已就绪**
+
+**任何时刻，只要你拿到 A，它一定是可用的**
+
+------
+
+#### 2️⃣ 字段注入：先创建对象，再补依赖
+
+```
+public class A {
+    @Resource
+    private B b;
+}
+```
+
+Spring 的流程是：
+
+1. 先调用 `new A()`
+2. 此时：`b == null`
+3. Spring 反射设置字段 `b`
+4. 对象才“完整”
+
+> **在第 2 步到第 3 步之间，对象是“不完整的”**
+
+
+
+
 
 
 
@@ -13319,6 +13585,32 @@ redis-cli -a 你的密码
 
 ```redis
 lpush user 1 2 3//执行顺序是1，2，3
+```
+
+### 2.2 对象copy到map
+
+这里可以改变数据类型
+
+```java
+        UserDTO userDTO = BeanUtil.copyProperties(user, UserDTO.class);
+        Map<String, Object> stringObjectMap = BeanUtil.beanToMap(userDTO,new HashMap<>(),
+                new CopyOptions().setIgnoreNullValue(true)
+                        .setFieldValueEditor((fieldName,fieldValue)->fieldValue.toString()));
+
+```
+
+### 2.3 JSONUtil类的方法
+
+```java
+JSONUtil.toBean(shopJson,Shop.class)
+    
+JSONUtil.toJsonStr(shop)
+```
+
+### 2.4 MyBatisPlus小技术
+
+```java
+typeService.query().orderByAsc("sort").list();
 ```
 
 
@@ -13367,6 +13659,41 @@ lpush user 1 2 3//执行顺序是1，2，3
 
 #### 5. List类型
 
+##### 5.0 命令
+
+###### 1.
+
+```java
+List<String> jsonList = stringRedisTemplate.opsForList().range(sort, 0, -1);
+
+存的是：
+[
+  "{\"id\":1,\"name\":\"美食\"}",
+  "{\"id\":2,\"name\":\"娱乐\"}"
+]
+
+怎么办：
+List<ShopType> shopTypeList = jsonList.stream()
+        .map(json -> JSONUtil.toBean(json, ShopType.class))
+        .collect(Collectors.toList());
+
+```
+
+###### 2.
+
+```java
+List<ShopType> shopTypeList = JSONUtil.toList(jsonList, ShopType.class);
+期望参数：String jsonArrayStr
+
+[
+  {"id":1,"name":"美食"},
+  {"id":2,"name":"娱乐"}
+]
+
+```
+
+
+
 ##### 5.1 简介
 
 ![image-20251230212250239](../AppData/Roaming/Typora/typora-user-images/image-20251230212250239.png)
@@ -13393,7 +13720,193 @@ lpush user 1 2 3//执行顺序是1，2，3
 
 ##### 7.2 命令
 
-![image-20251231151034351](../AppData/Roaming/Typora/typora-user-images/image-20251231151034351.png)
+默认升序排列
+
+![image-20251231152136068](../AppData/Roaming/Typora/typora-user-images/image-20251231152136068.png)
+
+![image-20251231152209277](../AppData/Roaming/Typora/typora-user-images/image-20251231152209277.png)
+
+### 3.3 redis的Java客户端
+
+#### 1. 简介
+
+![image-20251231163846960](../AppData/Roaming/Typora/typora-user-images/image-20251231163846960.png)
+
+#### 2. Jedis
+
+##### 2.0 必要操作
+
+![image-20251231165224849](../AppData/Roaming/Typora/typora-user-images/image-20251231165224849.png)
+
+##### 2.1 操作
+
+![image-20251231164145001](../AppData/Roaming/Typora/typora-user-images/image-20251231164145001.png)
+
+![image-20251231164154990](../AppData/Roaming/Typora/typora-user-images/image-20251231164154990.png)
+
+#### 3. SpringDataRedis
+
+##### 3.1 简介
+
+![image-20260101112338521](../AppData/Roaming/Typora/typora-user-images/image-20260101112338521.png)
+
+##### 3.2 快速入门
+
+![image-20260101114242142](../AppData/Roaming/Typora/typora-user-images/image-20260101114242142.png)
+
+![image-20260101113642603](../AppData/Roaming/Typora/typora-user-images/image-20260101113642603.png)
+
+**下面配置文件一定要选择lettuce实现**
+
+![image-20260101113803029](../AppData/Roaming/Typora/typora-user-images/image-20260101113803029.png)
+
+![image-20260101113825955](../AppData/Roaming/Typora/typora-user-images/image-20260101113825955.png)
+
+#### 3.4 序列化处理（简单，但额外内存）
+
+##### 1. 问题
+
+![image-20260101210722100](../AppData/Roaming/Typora/typora-user-images/image-20260101210722100.png)
+
+##### 2. 操作
+
+![image-20260101210700906](../AppData/Roaming/Typora/typora-user-images/image-20260101210700906.png)
+
+#### 3.5 序列化（麻烦，但省内存）
+
+##### 1. 问题
+
+![image-20260101211814531](../AppData/Roaming/Typora/typora-user-images/image-20260101211814531.png)
+
+
+
+
+
+
+
+##### 2. 解决
+
+![image-20260101211404477](../AppData/Roaming/Typora/typora-user-images/image-20260101211404477.png)
+
+![image-20260101211601480](../AppData/Roaming/Typora/typora-user-images/image-20260101211601480.png)
+
+
+
+## 4. 短信登陆
+
+### 4.1 思维图
+
+![image-20260102163923897](../AppData/Roaming/Typora/typora-user-images/image-20260102163923897.png)
+
+### 4.2 问题及解决
+
+#### 1. 问题
+
+![image-20260103161102965](../AppData/Roaming/Typora/typora-user-images/image-20260103161102965.png)
+
+#### 2. 实现思路
+
+![image-20260103162455090](../AppData/Roaming/Typora/typora-user-images/image-20260103162455090.png)
+
+### 4.3 缓存过期问题
+
+#### 1. 解决
+
+![image-20260104184853526](../AppData/Roaming/Typora/typora-user-images/image-20260104184853526.png)
+
+
+
+## 5. 缓存
+
+### 5.1 基础
+
+#### 1. 简介
+
+![image-20260104191214813](../AppData/Roaming/Typora/typora-user-images/image-20260104191214813.png)
+
+#### 2. 缓存优缺点
+
+![image-20260104191922580](../AppData/Roaming/Typora/typora-user-images/image-20260104191922580.png)
+
+#### 3. 添加redis缓存思路
+
+![image-20260104193130969](../AppData/Roaming/Typora/typora-user-images/image-20260104193130969.png)
+
+### 5.2 缓存更新策略
+
+#### 1. 基础
+
+![image-20260108131733152](../AppData/Roaming/Typora/typora-user-images/image-20260108131733152.png)
+
+##### 1.1 方法
+
+![image-20260108132035160](../AppData/Roaming/Typora/typora-user-images/image-20260108132035160.png)
+
+###### 1.2 最好方法
+
+![image-20260108133236075](../AppData/Roaming/Typora/typora-user-images/image-20260108133236075.png)
+
+![image-20260108134133175](../AppData/Roaming/Typora/typora-user-images/image-20260108134133175.png)
+
+![image-20260108134401262](../AppData/Roaming/Typora/typora-user-images/image-20260108134401262.png)
+
+
+
+### 5.3 缓存穿透
+
+#### 1. 基础
+
+![image-20260108171458968](../AppData/Roaming/Typora/typora-user-images/image-20260108171458968.png)
+
+![image-20260108173926997](../AppData/Roaming/Typora/typora-user-images/image-20260108173926997.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
