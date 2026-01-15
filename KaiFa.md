@@ -12366,6 +12366,60 @@ spring:
 
 #### 1. nacos
 
+##### 1.0 重点易混
+
+###### 1
+
+| **服务角色**       | **是否需要 @EnableFeignClients** | **理由**                                                     |
+| ------------------ | -------------------------------- | ------------------------------------------------------------ |
+| **Admin (消费者)** | **必须有**                       | 需要扫描并创建 `AdminMsgClient` 的代理对象，否则调用报错。   |
+| **User (提供者)**  | **可以没有**                     | 它只需要提供 Controller 接口即可。只有当 User 也要调 Admin 时才需要加。 |
+
+###### 2
+
+```java
+public class DefaultFeignConfig {
+    @Bean
+    public Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
+    }
+    @Bean
+    public RequestInterceptor userInfoInterceptor() {
+        return new RequestInterceptor(){
+            @Override
+            public void apply(RequestTemplate template) {
+                Integer userInfo = UserContext.getUser();
+                if (userInfo != null) {
+                    template.header("userInfo", userInfo.toString());
+                }
+            }
+        };
+    }
+}
+// 解释
+
+@Bean
+将这个拦截器注册为 Spring 的一个 Bean。由于它在 DefaultFeignConfig 中，Feign 在发送任何请求前都会自动调用它。
+
+public RequestInterceptor userInfoInterceptor()
+这是一个 Feign 拦截器。它就像是一个“收费站”，所有从当前服务发出去的 Feign 请求都要经过这里。
+
+Integer userInfo = UserContext.getUser();
+UserContext：通常是一个自定义的工具类，底层封装了 ThreadLocal。
+
+作用：从当前线程中获取已经登录的用户信息。因为在 Spring Boot 中，处理一个请求通常是同一个线程，所以能拿到之前拦截器（HandlerInterceptor）存入的用户 ID。
+
+if (userInfo != null)
+判断当前是否有登录用户。如果是定时任务或不需要登录的匿名调用，这里可能为空。
+
+template.header("userInfo", userInfo.toString());
+template：这是 Feign 请求的模板。
+
+操作：在 HTTP 请求头（Header）中添加一个名为 "userInfo" 的字段，值就是用户 ID。
+```
+
+
+
 ##### 1.1 注册中心原理
 
 ![image-20251019204911746](../AppData/Roaming/Typora/typora-user-images/image-20251019204911746.png)
@@ -13224,6 +13278,10 @@ java -Dserver.port=8090 -Dcsp.sentinel.dashboard.server=localhost:8090 -Dproject
 
 ## 0. 前置
 
+**Redis 缓存是缓存在“服务端”的，而不是客户端。**
+
+
+
 ```
 sudo mkdir -p /opt/mysql-hm-dp/data
 sudo chown -R 999:999 /opt/mysql-hm-dp/data  # MySQL 容器内部用户 UID/GID 通常为 999，确保权限正确
@@ -13613,6 +13671,21 @@ JSONUtil.toJsonStr(shop)
 typeService.query().orderByAsc("sort").list();
 ```
 
+### 2.5 如何在不修改其他类的源码进行增加字段
+
+#### 1.最好方法
+
+```java
+// 这里的Object用的太好了！！！
+@Data
+public class RedisData {
+    private LocalDateTime expireTime;
+    private Object data;
+}
+```
+
+#### 2. 继承就行
+
 
 
 
@@ -13860,41 +13933,317 @@ List<ShopType> shopTypeList = JSONUtil.toList(jsonList, ShopType.class);
 
 ![image-20260108173926997](../AppData/Roaming/Typora/typora-user-images/image-20260108173926997.png)
 
+### 5.4 缓存雪崩
+
+![image-20260110112727909](../AppData/Roaming/Typora/typora-user-images/image-20260110112727909.png)
+
+### 5.5 缓存击穿
+
+#### 1. 基础
+
+![image-20260110113547708](../AppData/Roaming/Typora/typora-user-images/image-20260110113547708.png)
+
+#### 2. 两种方案具体
+
+![image-20260110115055164](../AppData/Roaming/Typora/typora-user-images/image-20260110115055164.png)
+
+![image-20260110115803474](../AppData/Roaming/Typora/typora-user-images/image-20260110115803474.png)
+
+#### 3. 逻辑过期
+
+![image-20260110190637915](../AppData/Roaming/Typora/typora-user-images/image-20260110190637915.png)
 
 
 
+## 6. 优惠券秒杀(id增强)
+
+### 6.1 基础
+
+#### 1. 问题
+
+![image-20260111193925560](../AppData/Roaming/Typora/typora-user-images/image-20260111193925560.png)
+
+#### 2. 全局id生成器
+
+![image-20260111194011082](../AppData/Roaming/Typora/typora-user-images/image-20260111194011082.png)
+
+![image-20260111194050187](../AppData/Roaming/Typora/typora-user-images/image-20260111194050187.png)
+
+#### 3. 总结
+
+**UUID在这里不推荐，**
+
+**redis自增虽好，但是记住一个key只能存2的64次方，**
+
+**数据库自增是单独创建一张主键表，上面记载id**
+
+![image-20260111212407039](../AppData/Roaming/Typora/typora-user-images/image-20260111212407039.png)
+
+#### 4. 如何合理创建表
+
+**4.1 普通券**
+
+![image-20260111221127657](../AppData/Roaming/Typora/typora-user-images/image-20260111221127657.png)
+
+**4.2 秒杀券**
+
+![image-20260111221255766](../AppData/Roaming/Typora/typora-user-images/image-20260111221255766.png)
+
+### 6.2 秒杀下单
+
+#### 1. 思路
+
+![image-20260112110223723](../AppData/Roaming/Typora/typora-user-images/image-20260112110223723.png)
+
+### 6.3 超卖问题
+
+#### 1. 简介
+
+![image-20260112152330742](../AppData/Roaming/Typora/typora-user-images/image-20260112152330742.png)
+
+#### 2. 解决方法
+
+![image-20260112152806768](../AppData/Roaming/Typora/typora-user-images/image-20260112152806768.png)
+
+**乐观锁，这不就是二次检查吗？这个能成功是靠sql语句判断和更新的时间差比较小**
+
+**下面改成>0最好**
+
+![image-20260112153247293](../AppData/Roaming/Typora/typora-user-images/image-20260112153247293.png)
+
+```java
+    boolean success = seckillVoucherService.update()
+            .setSql("stock = stock - 1")
+            .eq("voucher_id", voucherId)
+            .gt("stock", 0)//这里是乐观锁
+            .update();
+    if (!success) {
+        return Result.fail("优惠券库存不足");
+    }
+```
 
 
 
+![image-20260112160150099](../AppData/Roaming/Typora/typora-user-images/image-20260112160150099.png)
+
+#### 3. 一人一单
+
+```java
+        Long userId = UserHolder.getUser().getId();
+        synchronized (userId.toString().intern()) {
+            IVoucherOrderService proxy = (IVoucherOrderService) AopContext.currentProxy();//获取代理对象
+            return proxy.createVoucherOrder(voucherId);
+        }
+    }
+
+    @Transactional//事物是代理对象执行
+    public Result createVoucherOrder(Long voucherId){
+        // 5. 一人一单
+        Long userId = UserHolder.getUser().getId();
+```
 
 
 
+### 6.4 分布式锁
+
+#### 1. 面临的问题
+
+之前的锁锁不住
+
+![image-20260113112247194](../AppData/Roaming/Typora/typora-user-images/image-20260113112247194.png)
+
+#### 2. 基础
+
+##### 2.1 简介如何
+
+![image-20260113113827664](../AppData/Roaming/Typora/typora-user-images/image-20260113113827664.png)
+
+##### 2.2 简介
+
+![image-20260113114619896](../AppData/Roaming/Typora/typora-user-images/image-20260113114619896.png)
 
 
 
+##### 2.3 对比
+
+![image-20260113115323450](../AppData/Roaming/Typora/typora-user-images/image-20260113115323450.png)
+
+#### 3. 流程
+
+![image-20260113151915667](../AppData/Roaming/Typora/typora-user-images/image-20260113151915667.png)
 
 
 
+##### 3.1 初级脚本
+
+![image-20260113153013213](../AppData/Roaming/Typora/typora-user-images/image-20260113153013213.png)
+
+##### 3.2 新问题
+
+![image-20260113223851478](../AppData/Roaming/Typora/typora-user-images/image-20260113223851478.png)
+
+![image-20260113224338290](../AppData/Roaming/Typora/typora-user-images/image-20260113224338290.png)
+
+##### 3.3 解决方法
+
+![image-20260113224541594](../AppData/Roaming/Typora/typora-user-images/image-20260113224541594.png)
+
+##### 3.4 解决方法的代码
+
+```java
+//在 `SimpleRedisLock` 中，`ID_PREFIX` 的作用是**区分分布式集群中不同节点的线程**。具体解释如下：
+
+**1. `static` (静态) 的作用**
+*   **语义层面**：它确立了 `ID_PREFIX` 是属于**类**的，而不是属于某个 `SimpleRedisLock` 对象实例的。
+*   **唯一性与性能**：
+    *   该字段在**类加载**时初始化，且只执行一次 `UUID.randomUUID()`。
+    *   这意味着当前 JVM（也就是当前的 Java 服务进程）中的所有锁对象共用同一个 UUID。
+    *   **核心目的**：它标识了**当前的服务器节点**（Service Instance）。在分布式集群中，不同的服务器可能都会产生 ID 为 `10` 的线程，通过 `UUID(节点标识) + threadId`，可以确保生成的标识符在整个集群中是全局唯一的，防止误删其他服务器上相同 ID 线程持有的锁。
+
+**2. `final` (不可变) 的作用**
+*   **安全性**：确保 `ID_PREFIX` 在初始化后不可被修改。
+*   **一致性**：保证在应用程序运行期间，该节点的标识始终保持唯一且不变。
+
+**总结**
+这行代码生成了一个**JVM 级别的唯一标识**。
+如果不加 `static`，每次 `new SimpleRedisLock` 都会生成一个新的 UUID。虽然也能保证唯一性，但失去了“标识当前服务节点”的语义，且每次创建锁对象都要进行 UUID 计算，造成不必要的性能开销。
+    
+public class SimpleRedisLock implements ILock {
+
+    private StringRedisTemplate stringRedisTemplate;
+    private String name;
+
+    public SimpleRedisLock(StringRedisTemplate stringRedisTemplate, String name) {
+        this.stringRedisTemplate = stringRedisTemplate;
+        this.name = name;
+    }
+
+    private static final String KEY_PREFIX = "lock:";
+    private static final String ID_PREFIX = UUID.randomUUID().toString() + "-";
+
+    @Override
+    public boolean tryLock(long timeoutSec) {
+        String threadId = ID_PREFIX + Thread.currentThread().getId();
+        Boolean success = stringRedisTemplate.opsForValue()
+                .setIfAbsent(KEY_PREFIX + name, String.valueOf(threadId), timeoutSec, TimeUnit.SECONDS);
+        return Boolean.TRUE.equals(success);
+    }
+
+    @Override
+    public void unlock() {
+        String threadId = ID_PREFIX + Thread.currentThread().getId();
+        String id = stringRedisTemplate.opsForValue().get(KEY_PREFIX + name);
+        if (threadId.equals(id)) {
+            stringRedisTemplate.delete(KEY_PREFIX + name);
+        }
+    }
+}
+```
+
+##### 3.5 又出现新问题
+
+![image-20260114170804531](../AppData/Roaming/Typora/typora-user-images/image-20260114170804531.png)
+
+##### 3.6 lua脚本解决(可以完美解决)
+
+###### 1. 简介
+
+![image-20260114172132763](../AppData/Roaming/Typora/typora-user-images/image-20260114172132763.png)
+
+###### 2. 语法
+
+![image-20260114173339090](../AppData/Roaming/Typora/typora-user-images/image-20260114173339090.png)
+
+###### 3. 流程
+
+![image-20260114173803068](../AppData/Roaming/Typora/typora-user-images/image-20260114173803068.png)
+
+###### 4. 实现思路
+
+```java
+// 基于Lua脚本解锁
+@Override
+public void unlock() {
+    // 调用Lua脚本解锁
+    stringRedisTemplate.execute(
+            UNLOCK_SCRIPT,
+            Collections.singletonList(KEY_PREFIX + name),
+            ID_PREFIX + Thread.currentThread().getId());
+}
+
+// lua脚本
+if(redis.call('get',KEYS[1]) == ARGV[1]) then
+    return redis.call('del',KEYS[1])
+else
+    return 0
+end
+```
 
 
 
+![image-20260114195700126](../AppData/Roaming/Typora/typora-user-images/image-20260114195700126.png)
 
+### 6.5 优化分布式锁
 
+#### 1. 简介还存在的问题
 
+![image-20260114222248318](../AppData/Roaming/Typora/typora-user-images/image-20260114222248318.png)
 
+#### 2. 解决方法：Redisson
 
+##### 2.1 简介
 
+![image-20260114222520270](../AppData/Roaming/Typora/typora-user-images/image-20260114222520270.png)
 
+##### 2.1 入门
 
+![image-20260114222732780](../AppData/Roaming/Typora/typora-user-images/image-20260114222732780.png)
 
+![image-20260114222811210](../AppData/Roaming/Typora/typora-user-images/image-20260114222811210.png)
 
+##### 2.2 可重入锁原理
 
+![image-20260115112124465](../AppData/Roaming/Typora/typora-user-images/image-20260115112124465.png)
 
+##### 2.3 代码
 
+第一幅图注释有问题
 
+![image-20260115112844592](../AppData/Roaming/Typora/typora-user-images/image-20260115112844592.png)
 
+![image-20260115113011324](../AppData/Roaming/Typora/typora-user-images/image-20260115113011324.png)
 
+##### 2.4 重试和超时续约原理
 
+![image-20260115172411471](../AppData/Roaming/Typora/typora-user-images/image-20260115172411471.png)
+
+![image-20260115172147146](../AppData/Roaming/Typora/typora-user-images/image-20260115172147146.png)
+
+##### 2.5 主从一致性问题及原理
+
+![image-20260115202117248](../AppData/Roaming/Typora/typora-user-images/image-20260115202117248.png)
+
+![image-20260115202423647](../AppData/Roaming/Typora/typora-user-images/image-20260115202423647.png)
+
+#### 3. 总结分布式锁
+
+![image-20260115205240155](../AppData/Roaming/Typora/typora-user-images/image-20260115205240155.png)
+
+## 7. 秒杀速度优化
+
+### 7.1 基础
+
+#### 1. 问题
+
+![image-20260115214643449](../AppData/Roaming/Typora/typora-user-images/image-20260115214643449.png)
+
+#### 2. 解决思路
+
+![image-20260115215542434](../AppData/Roaming/Typora/typora-user-images/image-20260115215542434.png)
+
+#### 3. 解决方法
+
+![image-20260115222320064](../AppData/Roaming/Typora/typora-user-images/image-20260115222320064.png)
 
 
 
