@@ -14,12 +14,12 @@
 
 ## 🌟 学习内容 (Study Topics)
 
-目前主要关注和记录以下几个方向的学习心得（你可以根据实际情况修改）：
+目前主要关注和记录以下几个方向的学习心得：
 
-- **编程语言 (Programming Languages)**：如 Java, Python, JavaScript, Go 等。
-- **技术框架 (Frameworks)**：前端 (Vue/React) 与 后端 (Spring Boot 等) 的核心技术栈。
+- **编程语言 (Programming Languages)**：主要为 Python, Java，以及其他算法或后端相关语言。
+- **技术框架与组件 (Frameworks & Tools)**：后端核心技术栈 (Spring Boot, MySQL, Redis 等) 与 AI 算法框架 (PyTorch, LangChain 等)。
 - **计算机基础 (Computer Science)**：数据结构与算法、计算机网络、操作系统。
-- **前沿探索 (New Tech)**：人工智能 (AI)、大模型 (LLM)、云原生技术等。
+- **前沿探索 (New Tech)**：大语言模型 (LLM) 应用开发、Agent 智能体工作流、RAG 检索增强生成、云原生与分布式架构等。
 
 ## 📂 目录规划 (Directory Structure)
 
