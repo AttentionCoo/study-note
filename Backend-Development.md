@@ -9739,8 +9739,13 @@ https://qqe2.com/dev/createreg
 http://localhost:8000/model/get_result
 
 
+python getTestData.py --test_count 5
+python expand_contexts_resume.py medical_agent_eval_details.csv --out contexts_expanded.csv --force-restart
+
+
 
 // 启动：  uvicorn RunAPP:app --reload
+uvicorn mainApp:app --reload
 
 {
 
@@ -10123,6 +10128,775 @@ def decompose_and_diagnose(self, sum_talk: List[str], original_result: str, all_
 
 同时强调“警惕癫痫持续状态”“及时干预占位效应”等管理要点，有助于减少急性并发症。
 ```
+
+
+
+
+
+### 5. JWT 单点登录实现知识点总结
+
+#### 一、问题分析
+
+##### 1.1 原始问题
+
+- **症状**：Token 解析失败，报错 `Cannot invoke "Object.toString()" because the return value of "io.jsonwebtoken.Claims.get(Object)" is null`
+- **原因**：Token 中缺少 `jti`（JWT ID）字段
+- **后续问题**：即使修复 Token 后，两个设备可以同时登录（单点登录失效）
+
+##### 1.2 根本原因分析
+
+| 问题            | 原因                                     | 影响             |
+| --------------- | ---------------------------------------- | ---------------- |
+| Token 解析失败  | 登录时没有在 claims 中添加 `jti`         | 拦截器校验时 NPE |
+| 单点登录失效    | Redis 中没有存储 JTI；拦截器执行顺序错误 | 多设备同时登录   |
+| 旧 Token 仍可用 | 旧 Token 数据不清理                      | 被踢出后仍能访问 |
+
+---
+
+#### 二、JWT 与 JTI 概念
+
+##### 2.1 什么是 JWT？
+
+JWT (JSON Web Token) 是一种无状态的身份验证方案，由三部分组成：
+```
+Header.Payload.Signature
+```
+
+##### 2.2 什么是 JTI？
+
+**JTI** (JWT ID) 是 JWT 的标准声明（Claim），用于**唯一标识一个 Token**。
+
+```java
+// 生成 JTI（推荐使用 UUID）
+String jti = UUID.randomUUID().toString();
+
+// 放入 Token 的 claims
+Map<String, Object> claims = new HashMap<>();
+claims.put("id", userId);           // 用户 ID
+claims.put("jti", jti);              // 唯一 Token ID
+```
+
+##### 2.3 JTI 的作用
+
+- ✅ **单点登录实现**：通过 JTI 判断 Token 是否仍有效
+- ✅ **token 黑名单**：Token 注销时，记录该 JTI 为已注销
+- ✅ **防重放攻击**：同一 JTI 只能使用一次
+
+---
+
+#### 三、单点登录（SSO）实现方案
+
+##### 3.1 核心思路
+
+**单点登录 = 一个用户同时只能在一个地方登录**
+
+```
+用户在浏览器 A 登录
+  ↓
+生成 Token_A（包含 JTI_A）
+  ↓
+保存到 Redis：login:user:userId → JTI_A
+  ↓
+用户在浏览器 B 登录
+  ↓
+生成 Token_B（包含 JTI_B）
+  ↓
+更新 Redis：login:user:userId → JTI_B（覆盖 JTI_A）
+  ↓
+浏览器 A 使用 Token_A 访问
+  ↓
+拦截器比对：Token_A 的 JTI_A ≠ Redis 的 JTI_B
+  ↓
+拒绝访问（401）
+```
+
+##### 3.2 核心实现步骤
+
+###### 步骤 1：登录时生成 JTI 并存储到 Redis
+
+```java
+// 生成唯一 JTI
+String jti = UUID.randomUUID().toString();
+
+// 存入 Redis（键：login:user:userId，值：JTI）
+stringRedisTemplate.opsForValue().set(
+    "login:user:" + userId, 
+    jti,
+    3,  // 有效期
+    TimeUnit.DAYS
+);
+
+// 生成 Token 时包含 JTI
+Map<String, Object> claims = new HashMap<>();
+claims.put("id", userId);
+claims.put("jti", jti);
+String token = JWT.generateToken(claims);
+```
+
+###### 步骤 2：每次请求时校验 JTI
+
+```java
+// 从 Token 中获取 JTI
+String tokenJti = JWT.parseToken(token).get("jti").toString();
+
+// 从 Redis 中获取该用户的最新 JTI
+String redisJti = stringRedisTemplate.opsForValue()
+    .get("login:user:" + userId);
+
+// 比对：如果不一致，说明在其他地方登录了
+if (!redisJti.equals(tokenJti)) {
+    return false;  // 拒绝访问
+}
+```
+
+###### 步骤 3：登录新设备时清理旧 Token
+
+```java
+// 登录前，删除该用户的所有旧 Token
+private void cleanOldTokensBeforeLogin(Integer userId) {
+    Set<String> tokenKeys = stringRedisTemplate.keys("user:token:*");
+    for (String tokenKey : tokenKeys) {
+        Map<Object, Object> userMap = stringRedisTemplate
+            .opsForHash().entries(tokenKey);
+        if (userMap.get("id").equals(userId)) {
+            stringRedisTemplate.delete(tokenKey);  // 删除旧 Token
+        }
+    }
+}
+```
+
+---
+
+#### 四、JWT 工具类完整实现
+
+##### 4.1 JWT.java
+
+```java
+package com.it.utils;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Map;
+
+public class JWT {
+    private static final String SECRET_KEY = "/jdhn:836**1";
+
+    /**
+     * 生成 Token
+     * @param claims 包含 id、jti 等信息
+     * @return Token 字符串
+     */
+    public static String generateToken(Map<String, Object> claims) {
+        return Jwts.builder()
+                .signWith(SignatureAlgorithm.HS256, 
+                         SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+                .setExpiration(new Date(System.currentTimeMillis() 
+                                       + 1000 * 60 * 60 * 24 * 3))  // 3 天
+                .addClaims(claims)
+                .compact();
+    }
+
+    /**
+     * 解析 Token
+     * @param token Token 字符串
+     * @return Token 的 Claims 信息
+     */
+    public static Claims parseToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(SECRET_KEY.getBytes(StandardCharsets.UTF_8))
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    /**
+     * 从 Token 获取用户 ID
+     */
+    public static Integer getUserIdFromToken(String token) {
+        return Integer.valueOf(
+            parseToken(token).get("id").toString()
+        );
+    }
+
+    /**
+     * 从 Token 获取 JTI（必须防御性检查！）
+     */
+    public static String getJtiFromToken(String token) {
+        Object jti = parseToken(token).get("jti");
+        if (jti == null) {
+            throw new RuntimeException("Token 中缺少 jti 字段");
+        }
+        return jti.toString();
+    }
+}
+```
+
+---
+
+#### 五、拦截器实现
+
+##### 5.1 拦截器执行顺序问题
+
+**关键点**：`RefreshTokenInterceptor` 必须先执行，才能在 `Tokeninterceptor` 之前完成单点登录校验。
+
+###### ❌ 错误的顺序
+
+```java
+registry.addInterceptor(new Tokeninterceptor())
+    .order(0);  // ❌ 先执行
+
+registry.addInterceptor(new RefreshTokenInterceptor(...))
+    .order(1);  // ❌ 后执行，此时 ThreadLocal 已为空
+```
+
+###### ✅ 正确的顺序
+
+```java
+registry.addInterceptor(new RefreshTokenInterceptor(...))
+    .order(0);  // ✅ 先执行（处理单点登录）
+
+registry.addInterceptor(new Tokeninterceptor())
+    .order(1);  // ✅ 后执行（检查 ThreadLocal）
+```
+
+**原理**：`order` 值越小优先级越高，越先执行。
+
+##### 5.2 RefreshTokenInterceptor（单点登录拦截器）
+
+```java
+@Slf4j
+public class RefreshTokenInterceptor implements HandlerInterceptor {
+
+    private final StringRedisTemplate stringRedisTemplate;
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, 
+                            HttpServletResponse response, 
+                            Object handler) throws Exception {
+        String token = request.getHeader("token");
+        if (StrUtil.isBlank(token)) {
+            return true;
+        }
+
+        try {
+            // 1. 解析 Token
+            Integer userId = JWT.getUserIdFromToken(token);
+            Object jtiObj = JWT.parseToken(token).get("jti");
+            
+            // 2. 防御性检查：Token 中是否有 JTI
+            if (jtiObj == null) {
+                sendUnauthorized(response, "Token 已过期，请重新登录");
+                return false;
+            }
+            String tokenJti = jtiObj.toString();
+
+            // 3. 从 Redis 获取该用户的最新 JTI
+            String redisJti = stringRedisTemplate.opsForValue()
+                .get("login:user:" + userId);
+
+            // 4. 比对 JTI
+            if (redisJti == null) {
+                sendUnauthorized(response, "Token 已过期，请重新登录");
+                return false;
+            }
+            
+            if (!redisJti.equals(tokenJti)) {
+                log.warn("用户 {} 在其他地方登录", userId);
+                sendUnauthorized(response, "您的账号已在其他地方登录");
+                return false;
+            }
+
+            // 5. 加载用户信息到 ThreadLocal
+            Map<Object, Object> userMap = stringRedisTemplate
+                .opsForHash().entries("user:token:" + token);
+            if (!userMap.isEmpty()) {
+                UserDTO userDTO = BeanUtil.fillBeanWithMap(
+                    userMap, new UserDTO(), false
+                );
+                ThreadLocalUtil.setCurrentUser(userDTO);
+                stringRedisTemplate.expire("user:token:" + token, 
+                                          30, TimeUnit.MINUTES);
+            }
+
+        } catch (Exception e) {
+            log.error("Token 解析失败: {}", e.getMessage());
+            sendUnauthorized(response, "Token 解析失败，请重新登录");
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, 
+                               HttpServletResponse response, 
+                               Object handler, Exception ex) {
+        ThreadLocalUtil.removeCurrentUser();
+    }
+
+    private void sendUnauthorized(HttpServletResponse response, 
+                                 String msg) throws Exception {
+        response.setContentType("application/json;charset=UTF-8");
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.getWriter().write("{\"code\": 401, \"msg\": \"" 
+                                   + msg + "\"}");
+    }
+}
+```
+
+##### 5.3 Tokeninterceptor（权限检查拦截器）
+
+```java
+@Slf4j
+public class Tokeninterceptor implements HandlerInterceptor {
+
+    @Override
+    public boolean preHandle(HttpServletRequest request, 
+                            HttpServletResponse response, 
+                            Object handler) {
+        // 检查 ThreadLocal 中是否有用户信息
+        if (ThreadLocalUtil.getCurrentUser() == null) {
+            log.info("用户未登录，拒绝访问");
+            response.setStatus(401);
+            return false;
+        }
+        return true;
+    }
+}
+```
+
+##### 5.4 WebConfig（配置拦截器）
+
+```java
+@Configuration
+@RequiredArgsConstructor
+public class WebConfig implements WebMvcConfigurer {
+
+    private final StringRedisTemplate stringRedisTemplate;
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        // ⭐ 第一步：RefreshTokenInterceptor（order=0）
+        registry.addInterceptor(new RefreshTokenInterceptor(stringRedisTemplate))
+                .addPathPatterns("/**")
+                .excludePathPatterns(
+                        "/api/user/login",
+                        "/api/user/register",
+                        "/api/user/upload/**",
+                        "/error"
+                )
+                .order(0);
+
+        // ⭐ 第二步：Tokeninterceptor（order=1）
+        registry.addInterceptor(new Tokeninterceptor())
+                .addPathPatterns("/**")
+                .excludePathPatterns(
+                        "/api/user/login",
+                        "/api/user/register",
+                        "/api/user/upload/**",
+                        "/error"
+                )
+                .order(1);
+    }
+}
+```
+
+---
+
+#### 六、登录服务实现
+
+##### 6.1 LoginServiceImpl（核心：清理旧 Token）
+
+```java
+@Service
+@RequiredArgsConstructor
+@Slf4j
+public class LoginServiceImpl extends ServiceImpl<LoginMapper, User> 
+                            implements ILoginService {
+
+    private final StringRedisTemplate stringRedisTemplate;
+
+    @Override
+    public Result loginInto(User u) {
+        // 1. 查询数据库、验证密码
+        User dbUser = query().eq("name", u.getName()).one();
+        
+        if (dbUser == null || !dbUser.getPassword().equals(u.getPassword())) {
+            return Result.error("用户不存在或密码错误");
+        }
+
+        // ⭐ 2. 登录前清理该用户的所有旧 Token（关键！）
+        cleanOldTokensBeforeLogin(dbUser.getId());
+
+        // 3. 生成新 JTI 并存入 Redis
+        String jti = UUID.randomUUID().toString();
+        stringRedisTemplate.opsForValue().set(
+            "login:user:" + dbUser.getId(),
+            jti,
+            3,
+            TimeUnit.DAYS
+        );
+
+        // 4. 生成 Token（包含 JTI）
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", dbUser.getId());
+        claims.put("name", dbUser.getName());
+        claims.put("jti", jti);  // 必须包含！
+        String token = JWT.generateToken(claims);
+
+        // 5. 存入 Token 详情（用于后续查询用户信息）
+        UserDTO userDTO = BeanUtil.copyProperties(dbUser, UserDTO.class);
+        Map<String, Object> userMap = BeanUtil.beanToMap(userDTO, new HashMap<>(),
+                new CopyOptions().setIgnoreNullValue(true)
+                        .setFieldValueEditor((fieldName, fieldValue) 
+                                           -> fieldValue.toString()));
+        stringRedisTemplate.opsForHash().putAll("user:token:" + token, userMap);
+        stringRedisTemplate.expire("user:token:" + token, 120, TimeUnit.MINUTES);
+
+        ThreadLocalUtil.setCurrentUser(userDTO);
+        return Result.success(new LoginInfo(dbUser.getName(), 
+                                           dbUser.getImage(), token));
+    }
+
+    @Override
+    public Result logOut(String token) {
+        if (StrUtil.isBlank(token)) return Result.error("Token为空");
+
+        try {
+            Integer userId = JWT.getUserIdFromToken(token);
+            // 清除 Redis 中的登录状态
+            stringRedisTemplate.delete("login:user:" + userId);
+            stringRedisTemplate.delete("user:token:" + token);
+            ThreadLocalUtil.removeCurrentUser();
+        } catch (Exception e) {
+            log.error("注销异常", e);
+        }
+        return Result.success("退出成功");
+    }
+
+    /**
+     * ⭐ 核心方法：登录前删除用户的所有旧 Token
+     * 
+     * 目的：当用户在新设备登录时，自动清理旧设备上的 Token，
+     *      使旧设备再用旧 Token 访问时被拒绝
+     */
+    private void cleanOldTokensBeforeLogin(Integer userId) {
+        try {
+            Set<String> tokenKeys = stringRedisTemplate.keys("user:token:*");
+            if (tokenKeys != null && !tokenKeys.isEmpty()) {
+                int deleteCount = 0;
+                for (String tokenKey : tokenKeys) {
+                    Map<Object, Object> userMap = stringRedisTemplate
+                        .opsForHash().entries(tokenKey);
+                    if (!userMap.isEmpty()) {
+                        Object userIdObj = userMap.get("id");
+                        // 如果是当前用户的旧 Token，删除
+                        if (userIdObj != null && 
+                            userId.equals(Integer.valueOf(
+                                userIdObj.toString()))) {
+                            stringRedisTemplate.delete(tokenKey);
+                            deleteCount++;
+                        }
+                    }
+                }
+                log.info("用户 {} 登录时清理了 {} 个旧 Token", 
+                        userId, deleteCount);
+            }
+        } catch (Exception e) {
+            log.error("清理旧 Token 异常: {}", e.getMessage());
+        }
+    }
+}
+```
+
+---
+
+#### 七、Redis 数据结构
+
+##### 7.1 登录时的 Redis 数据
+
+```redis
+# 用户 ID=2 登录时的 Redis 数据结构
+
+# 1. JTI 存储（用于单点登录校验）
+key: login:user:2
+value: "abc-123-def-456"  # UUID 格式的 JTI
+TTL: 3 天
+
+# 2. Token 详情存储（用于查询用户信息）
+key: user:token:<actual_token_string>
+type: hash
+fields:
+  - id: "2"
+  - name: "admin"
+  - email: "admin@example.com"
+  - ...
+TTL: 120 分钟
+
+# 3. 用户缓存（可选）
+key: cache:user:admin
+value: "{\"id\": 2, \"name\": \"admin\", ...}"  # JSON 格式
+TTL: 30 分钟
+```
+
+##### 7.2 多设备场景的 Redis 变化
+
+```
+时间 T1：用户在浏览器 A 登录
+┌──────────────────────────────────────────┐
+│ login:user:2 → jti_A                     │
+│ user:token:Token_A → {id:2, name:admin}  │
+└──────────────────────────────────────────┘
+
+时间 T2：用户在浏览器 B 登录（调用 cleanOldTokensBeforeLogin）
+┌──────────────────────────────────────────┐
+│ ❌ user:token:Token_A 被删除              │
+│ login:user:2 → jti_B （新 JTI）          │
+│ user:token:Token_B → {id:2, name:admin}  │
+└──────────────────────────────────────────┘
+
+时间 T3：浏览器 A 用旧 Token_A 访问接口
+┌──────────────────────────────────────────┐
+│ 拦截器比对：Token_A 的 jti_A ≠ Redis 的 jti_B
+│ 结果：401 拒绝访问                         │
+└──────────────────────────────────────────┘
+```
+
+---
+
+#### 八、常见错误与解决方案
+
+##### 8.1 Token 中没有 JTI
+
+| 错误现象                                                     | 原因                             | 解决方案                                    |
+| ------------------------------------------------------------ | -------------------------------- | ------------------------------------------- |
+| `Cannot invoke "Object.toString()" because the return value of "io.jsonwebtoken.Claims.get(Object)" is null` | 登录时没有在 claims 中添加 `jti` | 在 `generateToken` 前确保 claims 包含 `jti` |
+
+##### 8.2 Redis 中没有 JTI 数据
+
+| 错误现象            | 原因                        | 解决方案                                                     |
+| ------------------- | --------------------------- | ------------------------------------------------------------ |
+| 所有 Token 都被拒绝 | 登录时没有保存 JTI 到 Redis | 在 `loginInto()` 方法中调用 `stringRedisTemplate.opsForValue().set()` |
+
+##### 8.3 拦截器顺序错误
+
+| 错误现象                       | 原因                                                     | 解决方案                                       |
+| ------------------------------ | -------------------------------------------------------- | ---------------------------------------------- |
+| 单点登录不生效，多设备同时登录 | `RefreshTokenInterceptor` 在 `Tokeninterceptor` 之后执行 | 在 `WebConfig` 中设置 `order(0)` 和 `order(1)` |
+
+##### 8.4 被踢出后仍能访问
+
+| 错误现象                         | 原因                        | ���决方案                                             |
+| -------------------------------- | --------------------------- | ----------------------------------------------------- |
+| 旧设备登录后新设备还能用旧 Token | 登录时没有清理旧 Token 数据 | 在 `loginInto()` 中调用 `cleanOldTokensBeforeLogin()` |
+
+##### 8.5 防御性检查不足
+
+| 错误现象                    | 原因             | 解决方案                                         |
+| --------------------------- | ---------------- | ------------------------------------------------ |
+| Token 中没有 JTI 时直接 NPE | 没有做 null 检查 | 在 `getJtiFromToken()` 中判断 `if (jti == null)` |
+
+---
+
+#### 九、测试用例
+
+##### 9.1 单设备正常流程
+
+```
+1. 浏览器 A 登录
+   POST /api/user/login → 获得 Token_A
+
+2. 浏览器 A 访问接口
+   GET /api/user/title (token: Token_A) → 200 OK
+
+3. 浏览器 A 访问其他接口
+   GET /api/user/ques/getQues/23 (token: Token_A) → 200 OK
+
+4. 浏览器 A 退出登录
+   POST /api/user/logOut (token: Token_A) → 退出成功
+   
+5. 浏览器 A 再次访问
+   GET /api/user/title (token: Token_A) → 401（Token 已过期）
+```
+
+##### 9.2 多设备冲突流程
+
+```
+1. 浏览器 A 登录
+   POST /api/user/login → 获得 Token_A
+   Redis: login:user:2 → jti_A
+
+2. 浏览器 B 用同一账号登录
+   POST /api/user/login → 获得 Token_B
+   Redis: login:user:2 → jti_B（覆盖了 jti_A）
+   ✅ 旧 Token_A 数据被自动删除
+
+3. 浏览器 A 用旧 Token_A 访问
+   GET /api/user/title (token: Token_A)
+   → 拦截器比对：Token_A 的 jti_A ≠ Redis 的 jti_B
+   → 401 拒绝访问
+
+4. 浏览器 B 用新 Token_B 访问
+   GET /api/user/title (token: Token_B) → 200 OK
+```
+
+---
+
+#### 十、最佳实践
+
+##### 10.1 生成 JTI 的推荐方式
+
+```java
+// ✅ 推荐：使用 UUID
+String jti = UUID.randomUUID().toString();
+
+// ❌ 不推荐：使用简单的时间戳
+String jti = System.currentTimeMillis() + "";  // 容易重复
+```
+
+##### 10.2 Token 有效期与 Redis 有效期的关系
+
+```java
+// Token 有效期：3 天
+JWT Token 过期时间 = 当前时间 + 3 天
+
+// Redis 中 JTI 的过期时间：也设为 3 天或更长
+stringRedisTemplate.opsForValue().set(
+    "login:user:" + userId,
+    jti,
+    3,  // 与 Token 有效期保持一致
+    TimeUnit.DAYS
+);
+```
+
+##### 10.3 防御性编程
+
+```java
+// ✅ 好的做法：检查 null
+Object jtiObj = JWT.parseToken(token).get("jti");
+if (jtiObj == null) {
+    throw new RuntimeException("Token 中缺少 jti 字段");
+}
+
+// ✅ 好的做法：检查 Redis 数据
+String redisJti = stringRedisTemplate.opsForValue()
+    .get("login:user:" + userId);
+if (redisJti == null) {
+    return false;  // Token 可能已过期
+}
+
+// ❌ 不好的做法：直接使用，容易 NPE
+String tokenJti = JWT.getJtiFromToken(token).toString();  // 如果为 null 会崩溃
+```
+
+##### 10.4 日志记录的要点
+
+```java
+// ✅ 记录关键信息
+log.info("用户 {} 登录，生成 JTI: {}", userId, jti);
+log.warn("用户 {} 在其他地方登录", userId);
+log.info("用户 {} 登录时清理了 {} 个旧 Token", userId, deleteCount);
+
+// ❌ 避免记录敏感信息
+log.info("Token 内容: {}", token);  // 不要记录完整 Token
+```
+
+---
+
+#### 十一、扩展阅读
+
+##### 11.1 相关概念
+
+- **无状态认证**：服务器不需要保存 Session，只需验证 Token 有效性
+- **黑名单机制**：Token 注销时，将 JTI 加入黑名单，防止重复使用
+- **刷新 Token**：长期有效的 Token，用于获取新的短期 Token
+
+##### 11.2 安全建议
+
+- Token 应该通过 HTTPS 传输
+- Secret Key 应该足够长且复杂（不要硬编码在代码中）
+- 生产环境应该使用 RSA 非对称加密而不是 HS256
+- Token 应该存储在 HttpOnly Cookie 中，而不是 localStorage
+
+##### 11.3 相关库
+
+- `io.jsonwebtoken:jjwt`：Java JWT 库
+- `spring-data-redis`：Redis 操作库
+- `hutool`：工具库（提供 BeanUtil 等）
+
+---
+
+#### 总结
+
+**单点登录的核心三步：**
+
+1. **登录时**：生成 JTI，存入 Redis，放入 Token
+2. **验证时**：从 Token 和 Redis 获取 JTI，比对是否一致
+3. **新设备登录时**：自动删除旧设备的 Token，防止继续访问
+
+**关键代码片段：**
+
+```java
+// 1. 登录时
+String jti = UUID.randomUUID().toString();
+stringRedisTemplate.opsForValue().set("login:user:" + userId, jti, 3, TimeUnit.DAYS);
+claims.put("jti", jti);
+
+// 2. 验证时
+String tokenJti = JWT.parseToken(token).get("jti").toString();
+String redisJti = stringRedisTemplate.opsForValue().get("login:user:" + userId);
+if (!redisJti.equals(tokenJti)) return false;
+
+// 3. 新设备登录时
+cleanOldTokensBeforeLogin(userId);
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -13669,6 +14443,17 @@ JSONUtil.toJsonStr(shop)
 
 ```java
 typeService.query().orderByAsc("sort").list();
+
+
+
+boolean id1 = update().setSql("liked = liked + 1").eq("id", id).update();
+
+
+List<UserDTO> userDTOS = userService.query()
+        .in("id", collect).last("order by field(id,"+join+")").list()
+        .stream()
+        .map(user -> BeanUtil.copyProperties(user, UserDTO.class))
+        .collect(Collectors.toList());
 ```
 
 ### 2.5 如何在不修改其他类的源码进行增加字段
@@ -13685,6 +14470,200 @@ public class RedisData {
 ```
 
 #### 2. 继承就行
+
+
+
+### 2.6 Spring AOP 与 `@Transactional` 失效问题及解决方案
+
+#### 一、问题背景
+
+在 Spring 秒杀系统或高并发业务中，常见如下场景：
+
+- Service 方法内部调用另一个 `@Transactional` 方法
+- 在**异步线程**中调用带有 `@Transactional` 注解的方法
+
+此时会发现：
+**事务未生效（未回滚、数据库操作未受事务控制）**
+
+------
+
+#### 二、事务失效的根本原因
+
+##### 1. Spring 事务的实现机制
+
+Spring 的声明式事务是基于 **AOP 动态代理** 实现的，其核心机制是：
+
+- Spring 为目标类生成代理对象（Proxy）
+- 事务逻辑在 **代理对象方法调用前后** 织入
+- **只有通过代理对象调用方法，事务才会生效**
+
+------
+
+##### 2. 类内部自调用导致事务失效
+
+```java
+public void methodA() {
+    this.methodB(); // methodB 上有 @Transactional
+}
+```
+
+问题在于：
+
+- `this` 指向的是 **目标对象本身**
+- 调用 **未经过 Spring 代理**
+- AOP 无法介入
+- `@Transactional` 不生效
+
+------
+
+##### 3. 异步线程中直接调用导致事务失效
+
+```java
+new Thread(() -> {
+    createVoucherOrder();
+}).start();
+```
+
+原因：
+
+- 子线程不是 Spring 管理的线程
+- 若直接调用目标对象方法
+- 同样绕过了代理对象
+- 事务不会开启
+
+------
+
+#### 三、解决方案：显式使用代理对象调用方法
+
+##### 1. 使用 `AopContext.currentProxy()`
+
+Spring 提供：
+
+```java
+AopContext.currentProxy()
+```
+
+用于 **获取当前正在执行方法的代理对象**。
+
+示例：
+
+```java
+IVoucherOrderService proxy =
+    (IVoucherOrderService) AopContext.currentProxy();
+```
+
+此 `proxy` 即为 **具备事务增强能力的代理对象**。
+
+------
+
+##### 2. 通过代理对象调用事务方法
+
+```java
+proxy.createVoucherOrder(voucherOrder);
+```
+
+调用链变为：
+
+```
+代理对象 → 目标方法（@Transactional）
+```
+
+此时 Spring 能正确：
+
+- 开启事务
+- 提交或回滚事务
+
+------
+
+#### 四、结合秒杀系统的实际应用场景
+
+##### 1. 主线程（秒杀入口）
+
+```java
+public Result seckillVoucher(Long voucherId) {
+    // Lua 校验库存 + 一人一单
+    // 构造订单对象
+    // 放入阻塞队列
+    proxy = (IVoucherOrderService) AopContext.currentProxy();
+}
+```
+
+- 主线程只负责 **资格校验**
+- 不涉及数据库事务
+
+------
+
+##### 2. 异步线程（订单处理）
+
+```java
+proxy.createVoucherOrder(voucherOrder);
+```
+
+- 使用代理对象调用
+- 保证 `@Transactional` 生效
+- 完成：
+  - 一人一单校验
+  - 扣减库存
+  - 保存订单
+
+------
+
+#### 五、关键结论总结
+
+- `@Transactional` 依赖 **Spring AOP 代理**
+- **类内部自调用** 会绕过代理，导致事务失效
+- **异步线程直接调用目标方法** 同样无法触发事务
+- 通过 `AopContext.currentProxy()` 获取代理对象
+- 使用代理对象调用事务方法，可保证事务正常生效
+
+------
+
+#### 六、面试/考试标准回答
+
+> Spring 的事务是基于 AOP 动态代理实现的，只有通过代理对象调用带有 `@Transactional` 注解的方法，事务才能生效。类内部自调用或在异步线程中直接调用目标方法都会绕过代理，导致事务失效。可以通过 `AopContext.currentProxy()` 显式获取代理对象，并使用代理对象调用事务方法，从而保证事务的正确执行。
+
+------
+
+
+
+### 2.7 @TableField(exist = false)作用
+
+#### 详细解析
+
+在进行后端开发时，我们会定义一个 Java 类（Entity/实体类）来对应数据库里的一张表。通常情况下，类里的每个成员变量都对应表里的一个字段。
+
+但在某些场景下，我们需要在 Java 类中定义一些**临时变量**，这些变量不需要存入数据库。这时候就需要用到 `@TableField(exist = false)`。
+
+#### 1. 核心作用
+
+- **屏蔽映射**：MyBatis-Plus 在执行 SQL 操作（如 `select *` 或 `insert`）时，会自动根据实体类的属性生成 SQL。加上这个注解后，框架会**跳过**这个属性，不会去数据库表里找对应的列。
+- **防止报错**：如果不加这个注解，MyBatis-Plus 会默认去数据库里找同名的列，如果表里没有，程序就会报 `Unknown column`（找不到列）的错误。
+
+### 2.8 lambda表达式
+
+```java
+// 获取当前页数据
+List<Blog> records = page.getRecords();
+// 查询用户
+records.forEach(blog->{
+    this.queryBlogUser(blog);
+    this.isBlogLiked(blog);
+});
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -14244,6 +15223,350 @@ end
 #### 3. 解决方法
 
 ![image-20260115222320064](../AppData/Roaming/Typora/typora-user-images/image-20260115222320064.png)
+
+#### 4. 总结
+
+![image-20260116164715038](../AppData/Roaming/Typora/typora-user-images/image-20260116164715038.png)
+
+### 7.2 消息队列
+
+#### 1. 基础
+
+![image-20260116165957224](../AppData/Roaming/Typora/typora-user-images/image-20260116165957224.png)
+
+#### 2. 基于List消息队列
+
+##### 2.1 简介
+
+![image-20260116193732568](../AppData/Roaming/Typora/typora-user-images/image-20260116193732568.png)
+
+##### 2.2 总结
+
+![image-20260116194326105](../AppData/Roaming/Typora/typora-user-images/image-20260116194326105.png)
+
+#### 3. 基于PubSub订阅
+
+##### 3.1 简介
+
+![image-20260116200304086](../AppData/Roaming/Typora/typora-user-images/image-20260116200304086.png)
+
+##### 3.2 总结
+
+![image-20260116200853532](../AppData/Roaming/Typora/typora-user-images/image-20260116200853532.png)
+
+#### 4. 基于Stream的消息队列
+
+##### 4.1 简介
+
+###### 1. 发送
+
+![image-20260116202116405](../AppData/Roaming/Typora/typora-user-images/image-20260116202116405.png)
+
+###### 2. 读消息
+
+![image-20260116202553382](../AppData/Roaming/Typora/typora-user-images/image-20260116202553382.png)
+
+###### 3. 总结
+
+![image-20260116202758121](../AppData/Roaming/Typora/typora-user-images/image-20260116202758121.png)
+
+##### 4.2 消费者组
+
+###### 1. 简介
+
+![image-20260116215548883](../AppData/Roaming/Typora/typora-user-images/image-20260116215548883.png)
+
+###### 2. 命令
+
+**创建**
+
+![image-20260116215832204](../AppData/Roaming/Typora/typora-user-images/image-20260116215832204.png)
+
+**读**
+
+![image-20260116220359850](../AppData/Roaming/Typora/typora-user-images/image-20260116220359850.png)
+
+###### 3. 思路
+
+![image-20260116221537727](../AppData/Roaming/Typora/typora-user-images/image-20260116221537727.png)
+
+###### 4.总结
+
+**消息消费完了并不会从队列删除**
+
+![image-20260116221905623](../AppData/Roaming/Typora/typora-user-images/image-20260116221905623.png)
+
+##### 4.3 对比
+
+![image-20260116222037155](../AppData/Roaming/Typora/typora-user-images/image-20260116222037155.png)
+
+
+
+
+
+
+
+## 8. 达人探店(杂)
+
+### 1. 点赞功能
+
+#### 1.1 思路
+
+![image-20260121140608563](../AppData/Roaming/Typora/typora-user-images/image-20260121140608563.png)
+
+
+
+### 2. 关注推送
+
+#### 2.1 基础
+
+![image-20260121215354609](../AppData/Roaming/Typora/typora-user-images/image-20260121215354609.png)
+
+##### **几种模式**
+
+![image-20260121215635654](../AppData/Roaming/Typora/typora-user-images/image-20260121215635654.png)
+
+##### 拉模式
+
+**基本思想**
+
+> **用户查看时，主动拉取关注对象的内容**
+
+内容只存一份，**不主动推送**。
+ 当用户打开 Feed 时，系统再去查询他关注的所有人近期发布的内容。
+
+**典型流程**
+
+1. 用户 A 发布内容
+   - 只写一条内容记录
+2. 用户 B 打开 Feed
+3. 系统：
+   - 查 B 关注了哪些人
+   - 查这些人最近发布的内容
+   - 合并、排序后返回
+
+![image-20260121215827216](../AppData/Roaming/Typora/typora-user-images/image-20260121215827216.png)
+
+##### 推模式
+
+**基本思想**
+
+> **内容产生时，主动推送给所有关注者**
+
+当一个用户（UP 主 / 博主 / 商家）发布新内容时，系统会**立刻把这条内容写入每一个粉丝的收件箱（Feed 列表）中**
+
+**典型流程**
+
+1. 用户 A 发布一条动态
+2. 系统查询 A 的所有粉丝列表
+3. 对每一个粉丝 B：
+   - 将该动态写入 B 的 Feed 表 / 收件箱
+4. 用户 B 打开 App，直接读取自己的 Feed
+
+![image-20260121222339166](../AppData/Roaming/Typora/typora-user-images/image-20260121222339166.png)
+
+##### 推拉结合模式(最好)
+
+**基本思想**
+
+> **普通用户用推，大 V 用拉**
+
+这是目前**主流大厂采用的方案**，在性能和体验之间做折中。
+
+------
+
+**核心策略**
+
+按 **粉丝数 / 账号级别** 区分作者类型：
+
+| 作者类型    | 策略   |
+| ----------- | ------ |
+| 普通用户    | 推模式 |
+| 大 V / 明星 | 拉模式 |
+
+![image-20260121222710849](../AppData/Roaming/Typora/typora-user-images/image-20260121222710849.png)
+
+##### 总结
+
+![image-20260121223012569](../AppData/Roaming/Typora/typora-user-images/image-20260121223012569.png)
+
+#### 2.2 实现收件箱
+
+##### 1. 思路
+
+![image-20260121233049594](../AppData/Roaming/Typora/typora-user-images/image-20260121233049594.png)
+
+##### 2. 问题及解决
+
+**问题**
+
+![image-20260121233413490](../AppData/Roaming/Typora/typora-user-images/image-20260121233413490.png)
+
+**解决方法**
+
+![image-20260121233652200](../AppData/Roaming/Typora/typora-user-images/image-20260121233652200.png)
+
+#### 2.3 分页查询
+
+##### 1. 思路
+
+![image-20260122122312039](../AppData/Roaming/Typora/typora-user-images/image-20260122122312039.png)
+
+##### 2. 代码
+
+```java
+    @Data
+    public class ScrollResult {
+        private List<?> list;
+        private Long minTime;
+        private Integer offset;
+    }
+
+
+
+
+
+	@Override
+    public Result queryBlogByFollow(Long max, Integer offset) {
+        // 1. 获取当前用户ID
+        Long userId = UserHolder.getUser().getId();
+        // 2. 构建收件箱在Redis中的键名
+        String key = FEED_KEY + userId;
+        Set<ZSetOperations.TypedTuple<String>> typedTuples = stringRedisTemplate.opsForZSet()
+                .reverseRangeByScoreWithScores(key, 0, max, offset, 2);
+        if(typedTuples == null || typedTuples.isEmpty()){
+            return Result.ok();
+        }
+        // 3. 解析数据：blogId、minTime（时间戳）、offset
+        // 这里需要根据具体业务逻辑实现解析过程
+        List<Long> blogIds = new ArrayList<>(typedTuples.size());
+        long minTime = 0;
+        int os = 1;
+        for(ZSetOperations.TypedTuple<String> tuple : typedTuples){
+
+            blogIds.add(Long.valueOf(tuple.getValue()));
+            long time = tuple.getScore().longValue();
+            if(time == minTime){
+                os++;
+            }else{
+                minTime = time;
+                os = 1;
+            }
+        }
+        // 4. 根据解析出的blogId查询博客详情
+        // 需要调用BlogService或Mapper进行查询
+        String join = StrUtil.join(",", blogIds);
+        List<Blog> blogs = query().in("id", blogIds).last("order by field(id,"+join+")").list();
+        for(Blog blog : blogs){
+            // 查询用户
+            queryBlogUser(blog);
+            // 查询是否点赞
+            isBlogLiked(blog);
+        }
+        // 5. 封装查询结果并返回
+        ScrollResult scrollResult = new ScrollResult();
+        scrollResult.setList(blogs);
+        scrollResult.setMinTime(minTime);
+        scrollResult.setOffset(os);
+        return Result.ok(scrollResult); // 实际应返回封装好的博客列表
+    }
+```
+
+#### 3. 附近商铺
+
+##### 3.1 基础
+
+![image-20260122161936697](../AppData/Roaming/Typora/typora-user-images/image-20260122161936697.png)
+
+### 3. 每日签到
+
+#### 3.1 基础
+
+##### 1. 技术
+
+![image-20260123134116564](../AppData/Roaming/Typora/typora-user-images/image-20260123134116564.png)
+
+![image-20260123140548044](../AppData/Roaming/Typora/typora-user-images/image-20260123140548044.png)
+
+##### 2. 签到功能
+
+![image-20260123144134406](../AppData/Roaming/Typora/typora-user-images/image-20260123144134406.png)
+
+#### 3.2 操作
+
+##### 1. 思路
+
+![image-20260123151836360](../AppData/Roaming/Typora/typora-user-images/image-20260123151836360.png)
+
+### 4. UV统计
+
+#### 4.1 基础
+
+![image-20260123154220750](../AppData/Roaming/Typora/typora-user-images/image-20260123154220750.png)
+
+![image-20260123154339799](../AppData/Roaming/Typora/typora-user-images/image-20260123154339799.png)
+
+
+
+## 9. 分布式缓存
+
+### 9.1 基础
+
+#### 1. 单点redis问题
+
+![image-20260123181207308](../AppData/Roaming/Typora/typora-user-images/image-20260123181207308.png)
+
+
+
+### 9.2 redis持久化
+
+#### 1. RDB
+
+##### 1.1 简介
+
+![image-20260123181741813](../AppData/Roaming/Typora/typora-user-images/image-20260123181741813.png)
+
+##### 1.2 原理
+
+![image-20260123204029116](../AppData/Roaming/Typora/typora-user-images/image-20260123204029116.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -14836,6 +16159,315 @@ git add .gitignore
 git commit -m "更新 gitignore 规则"
 
 ```
+
+
+
+## 远程和本地不一样
+
+
+
+------
+
+### 一、拉取远程仓库覆盖本地
+
+#### 远程仓库完全覆盖本地
+
+```
+git fetch origin
+git reset --hard origin/main
+```
+
+作用：
+
+1. `git fetch origin`
+    拉取远程最新代码，但 **不修改本地文件**
+2. `git reset --hard origin/main`
+    让本地 **main 分支指针直接指向远程 main**
+
+结果：
+
+```
+本地代码 = 远程代码
+```
+
+并且：
+
+- 本地修改 ❌ 删除
+- 本地 commit ❌ 删除
+- 本地文件 ❌ 覆盖
+
+
+
+
+
+
+
+
+
+> **远程仓库更新了 + 本地也改了代码 → 保留本地修改，同时同步远程代码**
+
+------
+
+### 一、最标准流程（推荐长期使用）
+
+假设你在 `main` 分支开发。
+
+#### 第一步：先查看状态
+
+```bash
+git status
+```
+
+确认有没有未提交代码。
+
+------
+
+#### 第二步：提交本地修改
+
+如果有修改：
+
+```bash
+git add .
+git commit -m "your update"
+```
+
+确保 **本地改动已经变成 commit**。
+
+------
+
+#### 第三步：拉取远程代码并 rebase
+
+```bash
+git pull --rebase origin main
+```
+
+作用：
+
+```
+远程: A --- B --- C --- E
+本地: A --- B --- C --- D
+```
+
+执行后变成：
+
+```
+A --- B --- C --- E --- D
+```
+
+也就是：
+
+> **先应用远程更新，再把你的修改重新放上去**
+
+------
+
+#### 第四步：如果没有冲突
+
+直接 push：
+
+```bash
+git push origin main
+```
+
+完成。
+
+------
+
+### 二、如果出现冲突（很常见）
+
+执行 `git pull --rebase` 后可能看到：
+
+```
+CONFLICT (content): Merge conflict
+```
+
+#### 第一步：查看冲突文件
+
+```bash
+git status
+```
+
+会显示：
+
+```
+both modified: xxx.js
+```
+
+------
+
+#### 第二步：打开文件解决冲突
+
+你会看到：
+
+```
+<<<<<<< HEAD
+远程代码
+=======
+你的代码
+>>>>>>> commit
+```
+
+手动修改成你想要的版本，例如：
+
+```javascript
+最终代码
+```
+
+然后保存。
+
+------
+
+#### 第三步：标记冲突解决
+
+```bash
+git add 文件名
+```
+
+例如：
+
+```bash
+git add frontend/src/api/talk.js
+```
+
+------
+
+#### 第四步：继续 rebase
+
+```bash
+git rebase --continue
+```
+
+如果还有冲突继续解决。
+
+------
+
+#### 第五步：完成后 push
+
+```bash
+git push origin main
+```
+
+------
+
+
+
+------
+
+### 四、以后最安全的一套固定流程 ⭐
+
+每次开始开发前：
+
+```bash
+git pull --rebase origin main
+```
+
+开发完：
+
+```bash
+git add .
+git commit -m "update"
+git push origin main
+```
+
+------
+
+### 五、你这类 AI 项目强烈建议的 Git 习惯
+
+根据你现在的项目结构（`MedicalRAGLLM`）：
+
+```
+frontend/
+backend/
+model/
+```
+
+建议：
+
+#### 1 不要提交编译文件
+
+```
+.gitignore
+target/
+node_modules/
+dist/
+__pycache__/
+*.log
+```
+
+------
+
+#### 2 每次只提交相关目录
+
+例如只更新前端：
+
+```bash
+git add frontend
+git commit -m "update frontend"
+```
+
+------
+
+### 六、最重要的 3 条记住就够了
+
+#### 规则1
+
+本地有修改 → **先 commit**
+
+```
+git add .
+git commit -m "update"
+```
+
+------
+
+#### 规则2
+
+同步远程 → **永远用**
+
+```
+git pull --rebase origin main
+```
+
+------
+
+#### 规则3
+
+最后 push
+
+```
+git push origin main
+```
+
+------
+
+### 七、一个 Git 老手才知道的技巧（强烈建议）
+
+把 `pull` 默认改成 **rebase**：
+
+```bash
+git config --global pull.rebase true
+```
+
+以后你只需要：
+
+```bash
+git pull
+```
+
+Git 会自动用 rebase。
+
+------
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## 注意
 
