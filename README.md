@@ -21,11 +21,22 @@
 - **计算机基础 (Computer Science)**：数据结构与算法、计算机网络、操作系统。
 - **前沿探索 (New Tech)**：大语言模型 (LLM) 应用开发、Agent 智能体工作流、RAG 检索增强生成、云原生与分布式架构等。
 
-## 📂 目录规划 (Directory Structure)
+## 📂 目录结构 (Directory Structure)
 
-- `docs/` 或 `notes/`：按技术主题分类的格式化笔记。
-- `code_examples/`：存放平时练习、测试代码和小型 Demo。
-- `resources/`：学习过程中收集到的有价值的参考资料。
+```
+Note/
+├── AI/                        # 人工智能
+│   ├── 应用/                  # AI 应用 (Agent, RAG, 工作流, CoT)
+│   └── 算法/                  # AI 算法与深度学习 (Transformer, ML, PyTorch)
+├── 编程基础/                   # 数据结构与算法
+├── 后端开发/                   # 后端技术栈 (爬虫, Java, Spring Boot)
+├── 工程规范/                   # 项目命名与结构规范
+├── 杂记/                      # 杂项笔记与问题排查
+├── assets/
+│   └── images/                # 笔记图片资源
+├── .gitignore
+└── README.md
+```
 
 ## 🚀 关于本项目
 

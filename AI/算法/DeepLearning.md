@@ -1,20 +1,20 @@
-# 基础
+﻿# 基础
 
 ## 1. pytorch基础
 
 ### 1.1隐藏层用Sequential的定义方式（更简单）
 
-![image-20250119140506560](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250119140506560.png)
+![image-20250119140506560](../../assets/images/image-20250119140506560.png)
 
 **另一种**方式
 
-![image-20250119151647640](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250119151647640.png)
+![image-20250119151647640](../../assets/images/image-20250119151647640.png)
 
 
 
 ### 1.2两个向量的点积可以被看作衡量他们对齐程度的方法
 
-![image-20250209135000556](../AppData/Roaming/Typora/typora-user-images/image-20250209135000556.png)
+![image-20250209135000556](../../assets/images/image-20250209135000556.png)
 
 高维向量的方向对应了语义
 
@@ -185,15 +185,15 @@ delta_w = [
 
 ### 1.7之前的方法：
 
-![image-20250121172613055](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250121172613055.png)
+![image-20250121172613055](../../assets/images/image-20250121172613055.png)
 
 现在方法一：
 
-![image-20250121172827337](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250121172827337.png)
+![image-20250121172827337](../../assets/images/image-20250121172827337.png)
 
 方法二，用列表**（更多灵活性，但是更麻烦）**：
 
-![image-20250121173141823](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250121173141823.png)
+![image-20250121173141823](../../assets/images/image-20250121173141823.png)
 
 
 
@@ -203,11 +203,11 @@ delta_w = [
 
 ### 1.8 LayerNorm函数
 
-![111045dd197522f5409e935ca842c652_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\111045dd197522f5409e935ca842c652_720.jpg)
+![111045dd197522f5409e935ca842c652_720](../../assets/images/111045dd197522f5409e935ca842c652_720.jpg)
 
 ### 1.9 Embedding参数
 
-![1c48d54f13c3f1d54dbad08e6d882b6d_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\1c48d54f13c3f1d54dbad08e6d882b6d_720.jpg)
+![1c48d54f13c3f1d54dbad08e6d882b6d_720](../../assets/images/1c48d54f13c3f1d54dbad08e6d882b6d_720.jpg)
 
 ## 2. 深度学习的理解
 
@@ -251,43 +251,43 @@ delta_w = [
 
 ### 大模型流程
 
-![image-20250131194035347](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131194035347.png)
+![image-20250131194035347](../../assets/images/image-20250131194035347.png)
 
 transformer架构让大模型有了自己的思想，让它可以回答问题。
 
-![image-20250131194512463](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131194512463.png)
+![image-20250131194512463](../../assets/images/image-20250131194512463.png)
 
-![image-20250131194652620](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131194652620.png)
+![image-20250131194652620](../../assets/images/image-20250131194652620.png)
 
-![image-20250131195807062](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131195807062.png)
+![image-20250131195807062](../../assets/images/image-20250131195807062.png)
 
 ### Agent
 
-![image-20250131201748788](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131201748788.png)
+![image-20250131201748788](../../assets/images/image-20250131201748788.png)
 
-![image-20250131202056421](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131202056421.png)
+![image-20250131202056421](../../assets/images/image-20250131202056421.png)
 
-![image-20250131210809420](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131210809420.png)
+![image-20250131210809420](../../assets/images/image-20250131210809420.png)
 
-![image-20250131211028307](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131211028307.png)
+![image-20250131211028307](../../assets/images/image-20250131211028307.png)
 
-![image-20250131211619242](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131211619242.png)
+![image-20250131211619242](../../assets/images/image-20250131211619242.png)
 
-![image-20250131213410331](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131213410331.png)
+![image-20250131213410331](../../assets/images/image-20250131213410331.png)
 
 ### Agent相当于代理人，大脑还是llm
 
-![image-20250202150316304](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250202150316304.png)
+![image-20250202150316304](../../assets/images/image-20250202150316304.png)
 
-![image-20250202152409381](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250202152409381.png)
+![image-20250202152409381](../../assets/images/image-20250202152409381.png)
 
 ### self ask 不是通用框架，而是一些加上自问自答更好的模型需要
 
 如下是self ask
 
-![image-20250202153513963](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250202153513963.png)
+![image-20250202153513963](../../assets/images/image-20250202153513963.png)
 
-![image-20250202154302706](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250202154302706.png)
+![image-20250202154302706](../../assets/images/image-20250202154302706.png)
 
 模型能力定下后，Agent通过加入自我评估和反思等，进一步提高解决问题能力（简单的问题甚至可以不用工具）。
 
@@ -299,35 +299,35 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 
 ### 提示的重要性
 
-![image-20250204225440045](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204225440045.png)
+![image-20250204225440045](../../assets/images/image-20250204225440045.png)
 
 提示越冗余，结果越稳定
 
 
 
-![image-20250204230855559](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204230855559.png)
+![image-20250204230855559](../../assets/images/image-20250204230855559.png)
 
 ### 少量样本不会改变模型本身，但是fine-tuning会改变本身
 
-![image-20250204231302023](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204231302023.png)
+![image-20250204231302023](../../assets/images/image-20250204231302023.png)
 
 ### 各种器
 
-![image-20250204231629321](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204231629321.png)
+![image-20250204231629321](../../assets/images/image-20250204231629321.png)
 
-![image-20250204231831687](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204231831687.png)
+![image-20250204231831687](../../assets/images/image-20250204231831687.png)
 
-![image-20250205120837204](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205120837204.png)
+![image-20250205120837204](../../assets/images/image-20250205120837204.png)
 
-![image-20250205135451677](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205135451677.png)
+![image-20250205135451677](../../assets/images/image-20250205135451677.png)
 
-![image-20250205142500570](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205142500570.png)
+![image-20250205142500570](../../assets/images/image-20250205142500570.png)
 
-![image-20250205143000994](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205143000994.png)
+![image-20250205143000994](../../assets/images/image-20250205143000994.png)
 
-![image-20250205143222475](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205143222475.png)
+![image-20250205143222475](../../assets/images/image-20250205143222475.png)
 
-![image-20250205143511524](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205143511524.png)
+![image-20250205143511524](../../assets/images/image-20250205143511524.png)
 
 
 
@@ -339,13 +339,13 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 
 
 
-![image-20250205155552098](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205155552098.png)
+![image-20250205155552098](../../assets/images/image-20250205155552098.png)
 
 给模型思考时间：1.给模型足够信息
 
 ​                               2.复杂的步骤中，分步骤引导模型
 
-![image-20250205160914917](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205160914917.png)
+![image-20250205160914917](../../assets/images/image-20250205160914917.png)
 
 from langchain.prompts import FewShotPromptTemplate, PromptTemplate
 
@@ -407,9 +407,9 @@ print(filled_prompt)
 
 ### AI知识库类应用所产生的工作流
 
-![image-20250207145326563](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250207145326563.png)
+![image-20250207145326563](../../assets/images/image-20250207145326563.png)
 
-![image-20250207150347171](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250207150347171.png)
+![image-20250207150347171](../../assets/images/image-20250207150347171.png)
 
 
 
@@ -417,7 +417,7 @@ print(filled_prompt)
 
 ### 链结构
 
-![image-20250205144509184](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205144509184.png)
+![image-20250205144509184](../../assets/images/image-20250205144509184.png)
 
 多链结构，代码决定选择哪条链去解决问题最好？
 
@@ -427,11 +427,11 @@ print(filled_prompt)
 
 
 
-![image-20250204225702840](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204225702840.png)
+![image-20250204225702840](../../assets/images/image-20250204225702840.png)
 
-![image-20250204230111157](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204230111157.png)
+![image-20250204230111157](../../assets/images/image-20250204230111157.png)
 
-![image-20250204230630974](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204230630974.png)
+![image-20250204230630974](../../assets/images/image-20250204230630974.png)
 
 
 
@@ -441,7 +441,7 @@ print(filled_prompt)
 
 ### 历史记录模块
 
-![image-20250209191745071](../AppData/Roaming/Typora/typora-user-images/image-20250209191745071.png)
+![image-20250209191745071](../../assets/images/image-20250209191745071.png)
 
 说白了：就是把之前的聊天记录一并发给它
 
@@ -451,7 +451,7 @@ print(filled_prompt)
 
 ### Agent非常重要
 
-![image-20250209192531641](../AppData/Roaming/Typora/typora-user-images/image-20250209192531641.png)
+![image-20250209192531641](../../assets/images/image-20250209192531641.png)
 
 react:这里是reasoning and act
 
@@ -484,7 +484,7 @@ RouterChain由两部分构成：
 
 那么检索的模型也要包含client
 
-![image-20250617151606284](../AppData/Roaming/Typora/typora-user-images/image-20250617151606284.png)
+![image-20250617151606284](../../assets/images/image-20250617151606284.png)
 
 
 
@@ -775,7 +775,7 @@ rag处理代码
 
 #### 问题类型
 
-![image-20250219170647636](../AppData/Roaming/Typora/typora-user-images/image-20250219170647636.png)
+![image-20250219170647636](../../assets/images/image-20250219170647636.png)
 
 
 
@@ -785,7 +785,7 @@ rag处理代码
 
 这是脚本
 
-![image-20250310145958384](../AppData/Roaming/Typora/typora-user-images/image-20250310145958384.png)
+![image-20250310145958384](../../assets/images/image-20250310145958384.png)
 
 5. 脚本的作用和运行方式
 
@@ -846,7 +846,7 @@ rag处理代码
 
 ### 相似性做文章的地方
 
-![image-20250421205735441](../AppData/Roaming/Typora/typora-user-images/image-20250421205735441.png)
+![image-20250421205735441](../../assets/images/image-20250421205735441.png)
 
 ### 几个检索器特点
 
@@ -882,13 +882,13 @@ rag处理代码
 
 ### 1.解释
 
-![image-20250314225733300](../AppData/Roaming/Typora/typora-user-images/image-20250314225733300.png)
+![image-20250314225733300](../../assets/images/image-20250314225733300.png)
 
 
 
 代码解释
 
-![image-20250314225558492](../AppData/Roaming/Typora/typora-user-images/image-20250314225558492.png)
+![image-20250314225558492](../../assets/images/image-20250314225558492.png)
 
 ### 2.tokenizer
 
@@ -1566,7 +1566,7 @@ res = collection.query(
 
 ## 4. Embedding模型选择
 
-![image-20250731185516271](../AppData/Roaming/Typora/typora-user-images/image-20250731185516271.png)
+![image-20250731185516271](../../assets/images/image-20250731185516271.png)
 
 
 
@@ -1586,27 +1586,27 @@ res = collection.query(
 
 ### 一些文献
 
-![image-20250508172717363](../AppData/Roaming/Typora/typora-user-images/image-20250508172717363.png)
+![image-20250508172717363](../../assets/images/image-20250508172717363.png)
 
 ### 知识图谱
 
-![image-20250603163838384](../AppData/Roaming/Typora/typora-user-images/image-20250603163838384.png)
+![image-20250603163838384](../../assets/images/image-20250603163838384.png)
 
 数据集来源
 
-![image-20250525001846113](../AppData/Roaming/Typora/typora-user-images/image-20250525001846113.png)
+![image-20250525001846113](../../assets/images/image-20250525001846113.png)
 
 节点关系
 
-![image-20250525001941639](../AppData/Roaming/Typora/typora-user-images/image-20250525001941639.png)
+![image-20250525001941639](../../assets/images/image-20250525001941639.png)
 
 别人的想法
 
-![image-20250525002102219](../AppData/Roaming/Typora/typora-user-images/image-20250525002102219.png)
+![image-20250525002102219](../../assets/images/image-20250525002102219.png)
 
 ### 论文
 
-![image-20250525205105062](../AppData/Roaming/Typora/typora-user-images/image-20250525205105062.png)
+![image-20250525205105062](../../assets/images/image-20250525205105062.png)
 
 
 
@@ -1832,7 +1832,7 @@ res = collection.query(
 
 下面这张图才是都整合了前面的信息（图的左边V是乘以词嵌入的value）
 
-![image-20250209154740877](../AppData/Roaming/Typora/typora-user-images/image-20250209154740877.png)
+![image-20250209154740877](../../assets/images/image-20250209154740877.png)
 
 
 
@@ -1846,7 +1846,7 @@ res = collection.query(
 
 
 
-![image-20250209162531504](../AppData/Roaming/Typora/typora-user-images/image-20250209162531504.png)
+![image-20250209162531504](../../assets/images/image-20250209162531504.png)
 
 
 
@@ -1856,13 +1856,13 @@ res = collection.query(
 
 多加几个头更精确（就多加几个delta）
 
-![image-20250209162936158](../AppData/Roaming/Typora/typora-user-images/image-20250209162936158.png)
+![image-20250209162936158](../../assets/images/image-20250209162936158.png)
 
 
 
 #### 1.5 深层理解
 
-![image-20250209163459471](../AppData/Roaming/Typora/typora-user-images/image-20250209163459471.png)
+![image-20250209163459471](../../assets/images/image-20250209163459471.png)
 
 
 
@@ -2064,37 +2064,37 @@ text
 
 #### 1. 检索前
 
-![image-20260206212003053](../AppData/Roaming/Typora/typora-user-images/image-20260206212003053.png)
+![image-20260206212003053](../../assets/images/image-20260206212003053.png)
 
 #### 2. 创建时技巧
 
-![image-20260206212130963](../AppData/Roaming/Typora/typora-user-images/image-20260206212130963.png)
+![image-20260206212130963](../../assets/images/image-20260206212130963.png)
 
-![image-20260206212743093](../AppData/Roaming/Typora/typora-user-images/image-20260206212743093.png)
+![image-20260206212743093](../../assets/images/image-20260206212743093.png)
 
-![image-20260206213016322](../AppData/Roaming/Typora/typora-user-images/image-20260206213016322.png)
+![image-20260206213016322](../../assets/images/image-20260206213016322.png)
 
-![image-20260206213122967](../AppData/Roaming/Typora/typora-user-images/image-20260206213122967.png)
+![image-20260206213122967](../../assets/images/image-20260206213122967.png)
 
-![image-20260206213739360](../AppData/Roaming/Typora/typora-user-images/image-20260206213739360.png)
+![image-20260206213739360](../../assets/images/image-20260206213739360.png)
 
-![image-20260206213845116](../AppData/Roaming/Typora/typora-user-images/image-20260206213845116.png)
+![image-20260206213845116](../../assets/images/image-20260206213845116.png)
 
 #### 2.2 如何利用有效信息
 
-![image-20260206220921196](../AppData/Roaming/Typora/typora-user-images/image-20260206220921196.png)
+![image-20260206220921196](../../assets/images/image-20260206220921196.png)
 
 ##### 解决方法
 
-![image-20260206221631285](../AppData/Roaming/Typora/typora-user-images/image-20260206221631285.png)
+![image-20260206221631285](../../assets/images/image-20260206221631285.png)
 
-![image-20260206221725015](../AppData/Roaming/Typora/typora-user-images/image-20260206221725015.png)
+![image-20260206221725015](../../assets/images/image-20260206221725015.png)
 
 ### 2.2 完整系统
 
-![image-20260206221823134](../AppData/Roaming/Typora/typora-user-images/image-20260206221823134.png)
+![image-20260206221823134](../../assets/images/image-20260206221823134.png)
 
-![image-20260206222014011](../AppData/Roaming/Typora/typora-user-images/image-20260206222014011.png)
+![image-20260206222014011](../../assets/images/image-20260206222014011.png)
 
 
 

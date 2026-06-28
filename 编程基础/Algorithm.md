@@ -1,8 +1,8 @@
-# 方法
+﻿# 方法
 
 ## 1. 图的邻接表存储
 
-![image-20250122222614968](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250122222614968.png)
+![image-20250122222614968](../assets/images/image-20250122222614968.png)
 
 #include<bits/stdc++.h>
 using namespace std;
@@ -21,7 +21,7 @@ struct EDGE
 	**head[x]=sum;**
 **}</u>**
 
-![image-20250122230822221](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250122230822221.png)
+![image-20250122230822221](../assets/images/image-20250122230822221.png)
 
 ### 样例
 
@@ -102,49 +102,49 @@ int main()
 
 针对问题：
 
-![image-20250127233514658](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127233514658.png)
+![image-20250127233514658](../assets/images/image-20250127233514658.png)
 
-![Screenshot_20250127_234827_com.deepseek.chat](C:\Users\hp\Downloads/Screenshot_20250127_234827_com.deepseek.chat.jpg)
+![Screenshot_20250127_234827_com.deepseek.chat](../assets/images/Screenshot_20250127_234827_com.deepseek.chat.jpg)
 
 dfs序作用：
 
-![image-20250127233852110](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127233852110.png)
+![image-20250127233852110](../assets/images/image-20250127233852110.png)
 
-![image-20250127234346830](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127234346830.png)
+![image-20250127234346830](../assets/images/image-20250127234346830.png)
 
 ### dfs序
 
-![image-20250127234733565](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127234733565.png)
+![image-20250127234733565](../assets/images/image-20250127234733565.png)
 
-![image-20250127235124457](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127235124457.png)
+![image-20250127235124457](../assets/images/image-20250127235124457.png)
 
-![image-20250127235214465](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127235214465.png)
+![image-20250127235214465](../assets/images/image-20250127235214465.png)
 
-![image-20250127235334033](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127235334033.png)
+![image-20250127235334033](../assets/images/image-20250127235334033.png)
 
-![image-20250127235804523](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127235804523.png)
+![image-20250127235804523](../assets/images/image-20250127235804523.png)
 
-![image-20250128000200245](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128000200245.png)
+![image-20250128000200245](../assets/images/image-20250128000200245.png)
 
-![image-20250128000543613](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128000543613.png)
+![image-20250128000543613](../assets/images/image-20250128000543613.png)
 
-![image-20250128000954915](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128000954915.png)
+![image-20250128000954915](../assets/images/image-20250128000954915.png)
 
-![image-20250128001312368](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128001312368.png)
+![image-20250128001312368](../assets/images/image-20250128001312368.png)
 
-![image-20250128001645320](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128001645320.png)
+![image-20250128001645320](../assets/images/image-20250128001645320.png)
 
-![image-20250128001720963](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128001720963.png)
+![image-20250128001720963](../assets/images/image-20250128001720963.png)
 
-![image-20250128001745929](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128001745929.png)
+![image-20250128001745929](../assets/images/image-20250128001745929.png)
 
 ### ST表
 
-![Screenshot_20250128_150602_com.deepseek.chat](C:\Users\hp\Downloads/Screenshot_20250128_150602_com.deepseek.chat.jpg)
+![Screenshot_20250128_150602_com.deepseek.chat](../assets/images/Screenshot_20250128_150602_com.deepseek.chat.jpg)
 
 ### 三者关系
 
-![89efc8e0e72c3988ea4d422a8bfdd326_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\89efc8e0e72c3988ea4d422a8bfdd326_720.jpg)
+![89efc8e0e72c3988ea4d422a8bfdd326_720](../assets/images/89efc8e0e72c3988ea4d422a8bfdd326_720.jpg)
 
 
 
@@ -154,7 +154,7 @@ dfs序作用：
 
 ## **3. LCA模板题**
 
-![image-20250129180024269](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250129180024269.png)
+![image-20250129180024269](../assets/images/image-20250129180024269.png)
 
 第一表示以j（j是时间戳）为一个标尺的一个范围的时间戳最小的一个爹。
 
@@ -174,10 +174,10 @@ dfs序作用：
 
 **其实就是ans(也是t)是一棵装在数组的树，build不断把问题给的区间二分，好装进这棵树**
 
-![image-20250204145647450](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204145647450.png)
+![image-20250204145647450](../assets/images/image-20250204145647450.png)
 
 对结合律的解释
-![image-20250204145715869](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204145715869.png)
+![image-20250204145715869](../assets/images/image-20250204145715869.png)
 
 
 
@@ -185,9 +185,9 @@ dfs序作用：
 
 ## 5.数论中的欧拉定理
 
-![image-20250410165600048](../AppData/Roaming/Typora/typora-user-images/image-20250410165600048.png)
+![image-20250410165600048](../assets/images/image-20250410165600048.png)
 
-![image-20250410165632375](../AppData/Roaming/Typora/typora-user-images/image-20250410165632375.png)
+![image-20250410165632375](../assets/images/image-20250410165632375.png)
 
 
 
@@ -205,7 +205,7 @@ ix≡iy(moda),i^{x} \equiv i^{y} \pmod{a},ix≡iy(moda),
 在适当的条件下（比如指数运算结合多次乘法时，这种“降模”是允许的）。
 因此，在指数塔的每一层，只要我们知道上层结果 xxx 模 aaa 的值，那么用这个值计算 ixmod  ai^x \mod aixmoda 与用真实的 xxx 计算再取模是等效的。
 
-![image-20250211171337249](../AppData/Roaming/Typora/typora-user-images/image-20250211171337249.png)
+![image-20250211171337249](../assets/images/image-20250211171337249.png)
 
 
 
@@ -300,11 +300,11 @@ int main() {
 
 ## 10.关于大数的乘法
 
-![image-20250408221114668](../AppData/Roaming/Typora/typora-user-images/image-20250408221114668.png)
+![image-20250408221114668](../assets/images/image-20250408221114668.png)
 
-![image-20250408221140669](../AppData/Roaming/Typora/typora-user-images/image-20250408221140669.png)
+![image-20250408221140669](../assets/images/image-20250408221140669.png)
 
-![image-20250408221159506](../AppData/Roaming/Typora/typora-user-images/image-20250408221159506.png)
+![image-20250408221159506](../assets/images/image-20250408221159506.png)
 
 
 
@@ -312,7 +312,7 @@ int main() {
 
 **注意只能减2！**
 
-![image-20250409224053956](../AppData/Roaming/Typora/typora-user-images/image-20250409224053956.png)
+![image-20250409224053956](../assets/images/image-20250409224053956.png)
 
 
 
@@ -320,11 +320,11 @@ int main() {
 
 条件
 
-![image-20250409225840409](../AppData/Roaming/Typora/typora-user-images/image-20250409225840409.png)
+![image-20250409225840409](../assets/images/image-20250409225840409.png)
 
 计算
 
-![image-20250409225721156](../AppData/Roaming/Typora/typora-user-images/image-20250409225721156.png)
+![image-20250409225721156](../assets/images/image-20250409225721156.png)
 
 ## 12.乘法逆元
 
@@ -332,13 +332,13 @@ int main() {
 
 要求a和p互质
 
-![image-20250721115604376](../AppData/Roaming/Typora/typora-user-images/image-20250721115604376.png)
+![image-20250721115604376](../assets/images/image-20250721115604376.png)
 
-![image-20250721120116161](../AppData/Roaming/Typora/typora-user-images/image-20250721120116161.png)
+![image-20250721120116161](../assets/images/image-20250721120116161.png)
 
 ### 线性逆元
 
-![image-20250721123357753](../AppData/Roaming/Typora/typora-user-images/image-20250721123357753.png)
+![image-20250721123357753](../assets/images/image-20250721123357753.png)
 
 ## 13.素数筛
 
@@ -358,7 +358,7 @@ for i in [2..n]:
 
 ## 14.最小公倍数定理
 
-![image-20250721140604497](../AppData/Roaming/Typora/typora-user-images/image-20250721140604497.png)
+![image-20250721140604497](../assets/images/image-20250721140604497.png)
 
 
 
@@ -412,13 +412,13 @@ for i in [2..n]:
 
 ## 3.无后效性
 
-![image-20250706212100131](../AppData/Roaming/Typora/typora-user-images/image-20250706212100131.png)
+![image-20250706212100131](../assets/images/image-20250706212100131.png)
 
 ## 4.无后效性深刻理解
 
 **注意：一定要是前置条件已经解决，所以从左往右推**
 
-![image-20250706212301759](../AppData/Roaming/Typora/typora-user-images/image-20250706212301759.png)
+![image-20250706212301759](../assets/images/image-20250706212301759.png)
 
 ## 5.难点
 
@@ -428,7 +428,7 @@ for i in [2..n]:
 
 适用于无后效性顺序不好用for循环枚举的问题
 
-![image-20250706213158515](../AppData/Roaming/Typora/typora-user-images/image-20250706213158515.png)
+![image-20250706213158515](../assets/images/image-20250706213158515.png)
 
 ## 7.其实有两种考虑，顺推和逆推
 
@@ -446,7 +446,7 @@ for i in [2..n]:
 
 **就是利用题目，巧妙地设计状态，一般可以浓缩题目状态（要题目碰巧才行）**
 
-![image-20250831000419530](../AppData/Roaming/Typora/typora-user-images/image-20250831000419530.png)
+![image-20250831000419530](../assets/images/image-20250831000419530.png)
 
 
 
@@ -464,7 +464,7 @@ for i in [2..n]:
 
 其实就是想明白每个变量表示的意思，以及它与其他东西的等量关系
 
-![image-20250505191325367](../AppData/Roaming/Typora/typora-user-images/image-20250505191325367.png)
+![image-20250505191325367](../assets/images/image-20250505191325367.png)
 
 ## 2.模拟题目，看看有没有什么数学性质
 
@@ -492,7 +492,7 @@ dfs可以排序
 
 ## 6.二分方法（用这个）
 
-![image-20250806113036162](../AppData/Roaming/Typora/typora-user-images/image-20250806113036162.png)
+![image-20250806113036162](../assets/images/image-20250806113036162.png)
 
 
 
@@ -536,7 +536,7 @@ l,r 任务范围，tl，tr当前来到范围
 
 ## 5.query数组也要下传
 
-![image-20250515102342016](../AppData/Roaming/Typora/typora-user-images/image-20250515102342016.png)
+![image-20250515102342016](../assets/images/image-20250515102342016.png)
 
 ## 6.关于懒标记
 
@@ -546,7 +546,7 @@ l,r 任务范围，tl，tr当前来到范围
 
 ### 懒信息只下发一层，并且是该节点所包含的部分区间有修改才下传，否则只修改该节点，不改懒标记
 
-![image-20250515093751815](../AppData/Roaming/Typora/typora-user-images/image-20250515093751815.png)
+![image-20250515093751815](../assets/images/image-20250515093751815.png)
 
 
 
@@ -602,7 +602,7 @@ typedef long long 别名
 
 ## 3.字典的用法：
 
-![image-20250124201955858](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250124201955858.png)
+![image-20250124201955858](../assets/images/image-20250124201955858.png)
 
 如果 `a` 在 `map` 中不存在，`mp1[a]` 会自动创建一个空的 `vector<int>`，然后将 `b` 添加进去。
 
@@ -610,9 +610,9 @@ typedef long long 别名
 
 multiset允许元素重复
 
-![2e1fd37b8d64a965d5c89b8d04ea724b_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\2e1fd37b8d64a965d5c89b8d04ea724b_720.jpg)
+![2e1fd37b8d64a965d5c89b8d04ea724b_720](../assets/images/2e1fd37b8d64a965d5c89b8d04ea724b_720.jpg)
 
-![c6bc0a28b6453a3b4f0bcc072887b2f0_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\c6bc0a28b6453a3b4f0bcc072887b2f0_720.jpg)
+![c6bc0a28b6453a3b4f0bcc072887b2f0_720](../assets/images/c6bc0a28b6453a3b4f0bcc072887b2f0_720.jpg)
 
 ## 5.int最大保存10的9次方
 
@@ -633,7 +633,7 @@ sort(vec.begin(), vec.end(), greater<int>());
 
 ### 2.对数组排序
 
-![image-20250307235522746](../AppData/Roaming/Typora/typora-user-images/image-20250307235522746.png)
+![image-20250307235522746](../assets/images/image-20250307235522746.png)
 
 ### 3.vector<pair<int,int>>  v排序
 
@@ -693,7 +693,7 @@ void dfs(int* arr)
 
 ## 10.数组大小
 
-![image-20250330170733632](../AppData/Roaming/Typora/typora-user-images/image-20250330170733632.png)
+![image-20250330170733632](../assets/images/image-20250330170733632.png)
 
 ## 11.vector删除元素
 
