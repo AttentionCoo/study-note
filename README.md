@@ -6,66 +6,54 @@
   <img src="https://img.shields.io/github/stars/AttentionCoo/study-note?style=social" alt="Stars">
 </p>
 
-本人的学习项目与日常学习记录。在这里，我会将所学的知识进行整理和沉淀，见证自己的技术成长之路。
+欢迎来到我的个人技术备忘录与日常学习沉淀仓库。这里是我的“第二大脑”，用于记录在 AI 算法与工程落地交叉领域的探索、踩坑经验与技术成长。
+
+> 💡 *不积跬步无以至千里，这是一个用来对抗人类遗忘曲线的技术沉淀实验室。*
 
 ---
 
 ## 💫 关于我 (About Me)
 
-我是一名**深耕于深度学习、大语言模型 (LLM) 算法与 AI 应用开发**的开发者，同时具备扎实的 **Java 后端开发**基础。
+我是一名**深耕于深度学习、大语言模型 (LLM) 算法与 AI 应用开发**的开发者，同时具备扎实的 **Java 后端高并发微服务**架构基础。
+*(另外，我常自称是一名“平庸”的研究员，虽然某篇被 CVPR 录用的 Peer-reviewed 论文好像并不同意这个说法。😉)*
 
-*   🔭 **目前专注**：构建大模型驱动的应用（Agents 智能体、RAG 检索增强生成）以及打造智能生成式 AI 系统。
-*   🧠 **研究方向**：深度学习架构设计、大模型微调 (Fine-tuning) 以及模型推理优化。
-*   💻 **工程实践**：运用 Java / Spring Boot 和 Python 为 AI 模型构建健壮的后端 API 与微服务。
-*   🌱 **持续学习**：Agentic AI 工作流、多模态大模型以及分布式系统。
-*   💬 **欢迎探讨**：PyTorch, Transformers, LangChain, RAG, 或者 Spring Boot 相关技术。
+*   🔭 **目前专注**：架构生产级别的 LLM 应用（AI Agents 智能体编排、高级 Hybrid RAG）与打造工业级智能生成式 AI 系统。
+*   🧠 **研究与算法**：深度学习架构设计、PEFT（高效参数微微调）、模型量化（Quantization）以及推理加速优化。
+*   💻 **工程实践**：熟练运用 Python (PyTorch/FastAPI) 与 Java (Spring Boot/Spring Cloud) 打造高并发、高可靠的 AI 模型后端 API 与微服务管道。
+*   🌱 **持续进阶**：Multi-Agent 多智能体协同、多模态大模型（VLM）以及大规模分布式系统。
+*   💬 **探讨交流**：欢迎和我聊聊 PyTorch、Transformers、LangGraph、高级 RAG、Spring Cloud、高并发缓存优化，或者……**如何一不小心让 CVPR 接收**。
 
 ---
 
 ## 🛠️ 技术栈 (Tech Stack)
 
-### 🤖 Artificial Intelligence & Data Science
+### 🤖 Deep Learning & Large Language Models
 ![Python](https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white)
 ![PyTorch](https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white)
 ![Transformers](https://img.shields.io/badge/%F0%9F%A5%97_-Transformers-4B0082?style=flat-square)
 ![LangChain](https://img.shields.io/badge/%F0%9F%A6%9C%EF%B8%8F-LangChain-1C3C3C?style=flat-square)
+![LangGraph](https://img.shields.io/badge/🦜🕸️-LangGraph-0052CC?style=flat-square)
 
-### ☕ Backend Development
+### ☕ Backend & Infrastructure
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=flat-square&logo=openjdk&logoColor=white)
 ![Spring Boot](https://img.shields.io/badge/Spring_Boot-6DB33F?style=flat-square&logo=spring-boot&logoColor=white)
+![Spring Cloud](https://img.shields.io/badge/Spring_Cloud-6DB33F?style=flat-square&logo=spring&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-4479A1?style=flat-square&logo=mysql&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=flat-square&logo=redis&logoColor=white)
 
 ---
 
-## 🌟 学习内容 (Study Topics)
+## 📂 知识版图与目录规划 (Directory Structure)
 
-目前主要关注和记录以下几个方向的学习心得：
-
-### 🎯 编程语言 (Programming Languages)
-*   主要为 **Python**、**Java**，以及其他算法或后端相关语言的深度特性解析。
-
-### ⚙️ 技术框架与组件 (Frameworks & Tools)
-*   **后端核心技术栈**：Spring Boot, SpringCloud, MySQL, Redis 等高并发与高可用组件。
-*   **AI 算法框架**：PyTorch, LangChain, LangGraph, Transformers 等前沿 AI 开发生态。
-
-### 💾 计算机基础 (Computer Science)
-*   扎实内功修炼：数据结构与算法、计算机网络、操作系统底层原理。
-
-### 🚀 前沿探索 (New Tech)
-*   大语言模型 (LLM) 应用开发、Agent 智能体工作流、RAG 检索增强生成、云原生与分布式架构等。
-
----
-
-## 📂 目录规划 (Directory Structure)
-
-为了保持仓库井然有序，建议采用以下规范化的树状结构进行管理：
+为了保持内容的高可读性，本仓库按照技术栈与学习路径进行规范化管理：
 
 ```text
 📂 study-note
-├── 📂 docs / notes      # 按技术主题分类的格式化笔记 (.md)
-│   ├── 📝 AI-Algorithm  # LLM, PyTorch, RAG, Agent 工作流
-│   ├── 📝 Java-Backend  # Spring Boot, 并发架构, 数据库优化
-│   └── 📝 CS-Basics     # 算法、网络、操作系统基础
-├── 📂 code_examples     # 存放平时练习、测试代码和小型 Demo 实验室
-└── 📂 resources         # 学习过程中收集到的有价值、高质量的参考资料
+├── 📂 notes                  # 核心技术图谱与深度笔记
+│   ├── 📝 01-AI-Algorithm    # CV/DL 基础、Transformer 架构、CVPR 工业界延伸
+│   ├── 📝 02-LLM-Agents      # PEFT 微调、模型量化、LangGraph 矩阵协同、高级 RAG
+│   ├── 📝 03-Java-Backend    # Spring Boot 3.x, Spring Cloud 微服务、高并发削峰
+│   ├── 📝 04-Middleware      # Redis GEO/缓存优化、MySQL 调优、分布式事务/RabbitMQ
+│   └── 📝 05-CS-Basics       # 数据结构与算法（Kaggle 衍生）、网络与分布式底层原理
+├── 📂 code_examples          # 各种微型 Demo 实验室（如：模型微调脚本、SSE流式管道等）
+└── 📂 resources              # 极具学术与工程价值的高质量 Roadmap、论文及业界报告
