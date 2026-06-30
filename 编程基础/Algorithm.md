@@ -1,9 +1,29 @@
-﻿# 方法
+# 算法学习笔记
+
+---
+
+## 📑 目录
+
+| 序号 | 章节 | 核心内容 |
+|------|------|----------|
+| 一 | [方法](#方法) | 邻接表、树链剖分、LCA、线段树、数论、快速幂、大数运算、乘法逆元、素数筛 |
+| 二 | [千万注意要审题](#千万注意要审题) | 审题要点、时间分配 |
+| 三 | [经验](#经验) | 数据范围与算法选择、巧设数组 |
+| 四 | [动态规划](#动态规划) | 字符串DP、最优子结构、无后效性、记忆化搜索、升维 |
+| 五 | [解题思想](#解题思想) | 自然思想、逆向思维、递归、DFS、二分 |
+| 六 | [线段树想法](#线段树想法) | 懒标记、下传机制、query下传 |
+| 七 | [语法规则](#语法规则) | typedef、字典、set、排序、vector、cstring、状态压缩 |
+| 八 | [解题技巧](#解题技巧) | 区间、图、二进制、状态压缩、记忆化搜索、双指针、BFS |
+
+---
+
+# 方法
 
 ## 1. 图的邻接表存储
 
-![image-20250122222614968](../assets/images/image-20250122222614968.png)
+![image-20250122222614968](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250122222614968.png)
 
+```cpp
 #include<bits/stdc++.h>
 using namespace std;
 
@@ -12,149 +32,122 @@ int n,m,sum,tot;
 int head[maxn],ru[maxn],ts[maxn],dp[maxn];
 struct EDGE
 {
-	int to;int next;
+    int to;int next;
 }edge[maxn<<2];
-**void add(int x,int y)**
-**{**
-	**edge[++sum].next=head[x];**
-	**edge[sum].to=y;**
-	**head[x]=sum;**
-**}</u>**
 
-![image-20250122230822221](../assets/images/image-20250122230822221.png)
+void add(int x,int y)
+{
+    edge[++sum].next=head[x];
+    edge[sum].to=y;
+    head[x]=sum;
+}
+```
+
+![image-20250122230822221](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250122230822221.png)
 
 ### 样例
 
+```cpp
 void topsort()
 {
-	queue <int> q;
-	for (int i=1;i<=n;i++)
-	if (ru[i]==0) {
-	q.push(i);
-	ts[++tot]=i;
+    queue <int> q;
+    for (int i=1;i<=n;i++)
+    if (ru[i]==0) {
+        q.push(i);
+        ts[++tot]=i;
+    }
+    while (!q.empty())
+    {
+        int u=q.front();q.pop();
+        for (int i=head[u];i;i=edge[i].next)
+        {
+            int v=edge[i].to;
+            ru[v]--;
+            if (ru[v]==0) {
+                q.push(v);ts[++tot]=v;
+            }
+        }
+    }
 }
-	while (!q.empty())
-	{
-		int u=q.front();q.pop();
-		for (int i=head[u];i;i=edge[i].next)
-		{
-			int v=edge[i].to;
-			ru[v]--;
-			if (ru[v]==0) {
-			q.push(v);ts[++tot]=v;
-		}
-		}
-	}
-}
+
 int main()
 {
-	scanf("%d%d",&n,&m);
-	for (int i=1;i<=m;i++)
-	{
-		int u,v;
-		scanf("%d%d",&u,&v);
-		add(u,v);
-		ru[v]++;
-	}
-	topsort();
-	for (int i=1;i<=n;i++) dp[i]=1;
-	for (int i=1;i<=n;i++)
-	{
-		int u=ts[i];
-		**for (int j=head[u];j;j=edge[j].next)**
-		**{**
-			**int v=edge[j].to;**
-			**dp[v]=max(dp[v],dp[u]+1);**
-		}**
-	}
-	for (int i=1;i<=n;i++)
-	printf("%d\n",dp[i]);
-	return 0;
+    scanf("%d%d",&n,&m);
+    for (int i=1;i<=m;i++)
+    {
+        int u,v;
+        scanf("%d%d",&u,&v);
+        add(u,v);
+        ru[v]++;
+    }
+    topsort();
+    for (int i=1;i<=n;i++) dp[i]=1;
+    for (int i=1;i<=n;i++)
+    {
+        int u=ts[i];
+        for (int j=head[u];j;j=edge[j].next)
+        {
+            int v=edge[j].to;
+            dp[v]=max(dp[v],dp[u]+1);
+        }
+    }
+    for (int i=1;i<=n;i++)
+        printf("%d\n",dp[i]);
+    return 0;
 }
+```
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## **2. 树链剖分法**
+## 2. 树链剖分法
 
 针对问题：
 
-![image-20250127233514658](../assets/images/image-20250127233514658.png)
+![image-20250127233514658](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127233514658.png)
 
-![Screenshot_20250127_234827_com.deepseek.chat](../assets/images/Screenshot_20250127_234827_com.deepseek.chat.jpg)
+![Screenshot_20250127_234827_com.deepseek.chat](C:\Users\hp\Downloads/Screenshot_20250127_234827_com.deepseek.chat.jpg)
 
 dfs序作用：
 
-![image-20250127233852110](../assets/images/image-20250127233852110.png)
+![image-20250127233852110](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127233852110.png)
 
-![image-20250127234346830](../assets/images/image-20250127234346830.png)
+![image-20250127234346830](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127234346830.png)
 
 ### dfs序
 
-![image-20250127234733565](../assets/images/image-20250127234733565.png)
+![image-20250127234733565](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127234733565.png)
 
-![image-20250127235124457](../assets/images/image-20250127235124457.png)
+![image-20250127235124457](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127235124457.png)
 
-![image-20250127235214465](../assets/images/image-20250127235214465.png)
+![image-20250127235214465](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127235214465.png)
 
-![image-20250127235334033](../assets/images/image-20250127235334033.png)
+![image-20250127235334033](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127235334033.png)
 
-![image-20250127235804523](../assets/images/image-20250127235804523.png)
+![image-20250127235804523](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250127235804523.png)
 
-![image-20250128000200245](../assets/images/image-20250128000200245.png)
+![image-20250128000200245](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128000200245.png)
 
-![image-20250128000543613](../assets/images/image-20250128000543613.png)
+![image-20250128000543613](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128000543613.png)
 
-![image-20250128000954915](../assets/images/image-20250128000954915.png)
+![image-20250128000954915](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128000954915.png)
 
-![image-20250128001312368](../assets/images/image-20250128001312368.png)
+![image-20250128001312368](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128001312368.png)
 
-![image-20250128001645320](../assets/images/image-20250128001645320.png)
+![image-20250128001645320](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128001645320.png)
 
-![image-20250128001720963](../assets/images/image-20250128001720963.png)
+![image-20250128001720963](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128001720963.png)
 
-![image-20250128001745929](../assets/images/image-20250128001745929.png)
+![image-20250128001745929](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250128001745929.png)
 
 ### ST表
 
-![Screenshot_20250128_150602_com.deepseek.chat](../assets/images/Screenshot_20250128_150602_com.deepseek.chat.jpg)
+![Screenshot_20250128_150602_com.deepseek.chat](C:\Users\hp\Downloads/Screenshot_20250128_150602_com.deepseek.chat.jpg)
 
 ### 三者关系
 
-![89efc8e0e72c3988ea4d422a8bfdd326_720](../assets/images/89efc8e0e72c3988ea4d422a8bfdd326_720.jpg)
+![89efc8e0e72c3988ea4d422a8bfdd326_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\89efc8e0e72c3988ea4d422a8bfdd326_720.jpg)
 
+## 3. LCA模板题
 
-
-
-
-
-
-## **3. LCA模板题**
-
-![image-20250129180024269](../assets/images/image-20250129180024269.png)
+![image-20250129180024269](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250129180024269.png)
 
 第一表示以j（j是时间戳）为一个标尺的一个范围的时间戳最小的一个爹。
 
@@ -162,57 +155,33 @@ dfs序作用：
 
 第三是把它赋值为爹。
 
+## 4. 线段树
 
+> 其实就是ans（也是t）是一棵装在数组的树，build不断把问题给的区间二分，好装进这棵树。
 
+![image-20250204145647450](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204145647450.png)
 
+对结合律的解释：
 
+![image-20250204145715869](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204145715869.png)
 
+## 5. 数论中的欧拉定理
 
+![image-20250410165600048](../AppData/Roaming/Typora/typora-user-images/image-20250410165600048.png)
 
-
-## **4.线段树**
-
-**其实就是ans(也是t)是一棵装在数组的树，build不断把问题给的区间二分，好装进这棵树**
-
-![image-20250204145647450](../assets/images/image-20250204145647450.png)
-
-对结合律的解释
-![image-20250204145715869](../assets/images/image-20250204145715869.png)
-
-
-
-
-
-## 5.数论中的欧拉定理
-
-![image-20250410165600048](../assets/images/image-20250410165600048.png)
-
-![image-20250410165632375](../assets/images/image-20250410165632375.png)
-
-
+![image-20250410165632375](../AppData/Roaming/Typora/typora-user-images/image-20250410165632375.png)
 
 **互质的定义是两个数的最大公约数为1**
 
-
-
 ### 配套取模性质
 
-**模运算的保传性**：
-模运算有如下性质：如果 x≡y(moda)x \equiv y \pmod{a}x≡y(moda)，那么对于任意整数 iii，有
+**模运算的保传性**：模运算有如下性质：如果 $x \equiv y \pmod{a}$，那么对于任意整数 $i$，有 $i \cdot x \equiv i \cdot y \pmod{a}$，$i^{x} \equiv i^{y} \pmod{a}$，在适当的条件下（比如指数运算结合多次乘法时，这种"降模"是允许的）。因此在指数塔的每一层，只要我们知道上层结果 $x$ 模 $a$ 的值，那么用这个值计算 $i^x \mod a$ 与用真实的 $x$ 计算再取模是等效的。
 
-ix≡iy(moda),i^{x} \equiv i^{y} \pmod{a},ix≡iy(moda),
+![image-20250211171337249](../AppData/Roaming/Typora/typora-user-images/image-20250211171337249.png)
 
-在适当的条件下（比如指数运算结合多次乘法时，这种“降模”是允许的）。
-因此，在指数塔的每一层，只要我们知道上层结果 xxx 模 aaa 的值，那么用这个值计算 ixmod  ai^x \mod aixmoda 与用真实的 xxx 计算再取模是等效的。
+## 6. 快速幂最快写法
 
-![image-20250211171337249](../assets/images/image-20250211171337249.png)
-
-
-
-
-
-## 6.快速幂最快写法
-
+```cpp
 int quick(int base, int x, int mod){
     int res = 1;
     while(x){
@@ -222,255 +191,186 @@ int quick(int base, int x, int mod){
     }
     return res;
 }
+```
 
+## 7. 求最大公约数
 
+`gcd(a, b)` 函数
 
-
-
-## 7.求最大公约数
-
-gcd(a,b)函数
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## 8.数组减法
+## 8. 数组减法
 
 **关键点borrow，负数直接对结果取反**
 
+```cpp
 void subtract(int* A, int* B, int len) {
-
-  borrow = 0;
-
-  for (int i = 0; i < len; i++) {
-
-​    int diff = A[i] - B[i] - borrow;
-
-​    if (diff < 0) {
-
-​      diff += 10;
-
-​      borrow = 1;
-
-​    } else {
-
-​      borrow = 0;
-
-​    }
-
-​    result[i] = diff;
-
-  }
-
+    int borrow = 0;
+    for (int i = 0; i < len; i++) {
+        int diff = A[i] - B[i] - borrow;
+        if (diff < 0) {
+            diff += 10;
+            borrow = 1;
+        } else {
+            borrow = 0;
+        }
+        result[i] = diff;
+    }
 }
+```
 
-## 9.取绝对值
+## 9. 取绝对值
 
+```cpp
 #include <iostream>
-#include <cstdlib> // 用于整数的绝对值
-#include <cmath>   // 用于浮点数的绝对值
+#include <cstdlib>
+#include <cmath>
 
 int main() {
     int num1 = -10;
     double num2 = -10.5;
 
-    // 计算整数的绝对值
     int abs_num1 = std::abs(num1);
     std::cout << "整数的绝对值: " << abs_num1 << std::endl;
-    
-    // 计算浮点数的绝对值
+
     double abs_num2 = std::abs(num2);
     std::cout << "浮点数的绝对值: " << abs_num2 << std::endl;
-    
+
     return 0;
 }
+```
 
-## 10.关于大数的乘法
+## 10. 关于大数的乘法
 
-![image-20250408221114668](../assets/images/image-20250408221114668.png)
+![image-20250408221114668](../AppData/Roaming/Typora/typora-user-images/image-20250408221114668.png)
 
-![image-20250408221140669](../assets/images/image-20250408221140669.png)
+![image-20250408221140669](../AppData/Roaming/Typora/typora-user-images/image-20250408221140669.png)
 
-![image-20250408221159506](../assets/images/image-20250408221159506.png)
+![image-20250408221159506](../AppData/Roaming/Typora/typora-user-images/image-20250408221159506.png)
 
-
-
-## 11.除以某个数后取模
+## 11. 除以某个数后取模
 
 **注意只能减2！**
 
-![image-20250409224053956](../assets/images/image-20250409224053956.png)
+![image-20250409224053956](../AppData/Roaming/Typora/typora-user-images/image-20250409224053956.png)
 
+条件：
 
+![image-20250409225840409](../AppData/Roaming/Typora/typora-user-images/image-20250409225840409.png)
 
+计算：
 
+![image-20250409225721156](../AppData/Roaming/Typora/typora-user-images/image-20250409225721156.png)
 
-条件
-
-![image-20250409225840409](../assets/images/image-20250409225840409.png)
-
-计算
-
-![image-20250409225721156](../assets/images/image-20250409225721156.png)
-
-## 12.乘法逆元
+## 12. 乘法逆元
 
 ### 欧几里得扩展
 
 要求a和p互质
 
-![image-20250721115604376](../assets/images/image-20250721115604376.png)
+![image-20250721115604376](../AppData/Roaming/Typora/typora-user-images/image-20250721115604376.png)
 
-![image-20250721120116161](../assets/images/image-20250721120116161.png)
+![image-20250721120116161](../AppData/Roaming/Typora/typora-user-images/image-20250721120116161.png)
 
 ### 线性逆元
 
-![image-20250721123357753](../assets/images/image-20250721123357753.png)
+![image-20250721123357753](../AppData/Roaming/Typora/typora-user-images/image-20250721123357753.png)
 
-## 13.素数筛
+## 13. 素数筛
 
 时间复杂度O(n)
 
-primes = empty list
-for i in [2..n]:
+```python
+primes = []
+for i in range(2, n+1):
     if not vis[i]:
         primes.append(i)
-        // 这里可以做一些“i 是素数时”的额外操作
     for p in primes:
         if i * p > n: break
-        vis[i*p] = true
-        // 这里可以做一些“i*p 是合数时”的额外操作
+        vis[i*p] = True
         if i % p == 0:
             break
+```
 
-## 14.最小公倍数定理
+## 14. 最小公倍数定理
 
-![image-20250721140604497](../assets/images/image-20250721140604497.png)
-
-
-
-
-
-
-
-
-
-
-
-
+![image-20250721140604497](../AppData/Roaming/Typora/typora-user-images/image-20250721140604497.png)
 
 # 千万注意要审题
 
-
-
-## 1.最好把要表达的意思全部写上，不省略
-
-## 2.千万别急得做得很快，也不要一直死磕一道题！！！
+1. 最好把要表达的意思全部写上，不省略
+2. 千万别急得做得很快，也不要一直死磕一道题！
 
 # 经验
 
-## 1.数据范围只有50以下的题，一般dfs。数据范围4000左右的题，一般二分
+1. 数据范围只有50以下的题，一般dfs。数据范围4000左右的题，一般二分
+2. 巧设数组
 
-## 2.巧设数组
-
-    // row[i][d]：第 i 行上数字 d（0 表示 '1'，…，8 表示 '9'）是否已被使用
-    // col[j][d]：第 j 列上数字 d 是否已被使用
-    // box[b][d]：第 b 个 3×3 宫格里数字 d 是否已被使用
-
-
-
-
-
-
-
-
-
-
+```cpp
+// row[i][d]：第 i 行上数字 d（0 表示 '1'，…，8 表示 '9'）是否已被使用
+// col[j][d]：第 j 列上数字 d 是否已被使用
+// box[b][d]：第 b 个 3×3 宫格里数字 d 是否已被使用
+```
 
 # 动态规划
 
-## 1.在字符串中的应用
+## 1. 在字符串中的应用
 
 通常是dp[i]表示字符串s[0....i-1]
 
-## 2.动态规划的一些适用情况
+## 2. 动态规划的一些适用情况
 
 动态规划的题目分为两大类，一种是求最优解类，典型问题是背包问题，另一种就是计数类，比如这里的统计方案数的问题，它们都存在一定的递推性质。前者的递推性质还有一个名字，叫做 「最优子结构」 ——即当前问题的最优解取决于子问题的最优解，后者类似，当前问题的方案数取决于子问题的方案数。所以在遇到求方案数的问题时，我们可以往动态规划的方向考虑。
 
-## 3.无后效性
+## 3. 无后效性
 
-![image-20250706212100131](../assets/images/image-20250706212100131.png)
+![image-20250706212100131](../AppData/Roaming/Typora/typora-user-images/image-20250706212100131.png)
 
-## 4.无后效性深刻理解
+## 4. 无后效性深刻理解
 
 **注意：一定要是前置条件已经解决，所以从左往右推**
 
-![image-20250706212301759](../assets/images/image-20250706212301759.png)
+![image-20250706212301759](../AppData/Roaming/Typora/typora-user-images/image-20250706212301759.png)
 
-## 5.难点
+## 5. 难点
 
 怎么设计状态
 
-## 6.记忆化搜索
+## 6. 记忆化搜索
 
 适用于无后效性顺序不好用for循环枚举的问题
 
-![image-20250706213158515](../assets/images/image-20250706213158515.png)
+![image-20250706213158515](../AppData/Roaming/Typora/typora-user-images/image-20250706213158515.png)
 
-## 7.其实有两种考虑，顺推和逆推
+## 7. 顺推与逆推
 
 顺推是到哪里去
 
 逆推是从何而来。逆推中有拓扑搜索，其实和拓扑排序一样
 
-## 8.有些题可以考虑升维
+## 8. 有些题可以考虑升维
 
 一维数组不行，就开二维，第二位存某些题目上的值
 
-## 9.避免记忆化搜索的方法
+## 9. 避免记忆化搜索的方法
 
 其实也有搜索的影子
 
 **就是利用题目，巧妙地设计状态，一般可以浓缩题目状态（要题目碰巧才行）**
 
-![image-20250831000419530](../assets/images/image-20250831000419530.png)
-
-
-
-
-
-
-
-
-
-
+![image-20250831000419530](../AppData/Roaming/Typora/typora-user-images/image-20250831000419530.png)
 
 # 解题思想
 
-## 1.注意这里的自然思想
+## 1. 注意这里的自然思想
 
 其实就是想明白每个变量表示的意思，以及它与其他东西的等量关系
 
-![image-20250505191325367](../assets/images/image-20250505191325367.png)
+![image-20250505191325367](../AppData/Roaming/Typora/typora-user-images/image-20250505191325367.png)
 
-## 2.模拟题目，看看有没有什么数学性质
+## 2. 模拟题目，看看有没有什么数学性质
 
 并且思考是否可以逆向
 
-## 3.递归的三种看法
+## 3. 递归的三种看法
 
 1.每层只解决小部分，大部分问题往后抛
 
@@ -478,11 +378,11 @@ for i in [2..n]:
 
 3.感觉递归是一种规则，就是对每一个传入对象应用这种规则
 
-## 4.所有题的终极思想：顺不行，就逆！
+## 4. 所有题的终极思想：顺不行，就逆！
 
 为什么有这样的思想，我是从图得出来的。搜索时，一个节点有很多个后继，但所有后继只有一个前驱，这样可以巧妙存储一条路径。这种解法是数学终极思想的映射！
 
-## 5.对dfs的一些想法
+## 5. 对dfs的一些想法
 
 **dfs适用于对目标序列数量一定会变化并要从中找出符合条件的特殊处理**
 
@@ -490,55 +390,35 @@ dfs可以排序
 
 **dfs优势在于可以回溯**
 
-## 6.二分方法（用这个）
+## 6. 二分方法
 
-![image-20250806113036162](../assets/images/image-20250806113036162.png)
-
-
-
-
-
-
+![image-20250806113036162](../AppData/Roaming/Typora/typora-user-images/image-20250806113036162.png)
 
 # 线段树想法
 
-## 1.
+## 1. 核心思想
 
 对于线段树他的优化是不关注某些具体的个体的细节，而关注与他相关的区间的整体，这也是它的优势，他的整体时间复杂度才降低，所以对于某个个体并不现实。
 
+## 2. 参数含义
 
+l, r 任务范围，tl，tr当前来到范围
 
-## 2.
-
-l,r 任务范围，tl，tr当前来到范围
-
-
-
-## 3.
+## 3. 懒信息原则
 
 懒信息就是要懒，必须要往下传时，才传
 
+## 4. 更新流程
 
+1. 先看要更新的任务范围是否包含来到范围
+2. 是，懒标记与新标记运算然后加在该节点上
+3. 否，下传懒标记
 
-## 4.
+## 5. query数组也要下传
 
-流程：
+![image-20250515102342016](../AppData/Roaming/Typora/typora-user-images/image-20250515102342016.png)
 
-1.先看要更新的任务范围是否包含来到范围
-
-2.是，懒标记与新标记运算然后加在该节点上
-
-3.否，下传懒标记
-
-
-
-
-
-## 5.query数组也要下传
-
-![image-20250515102342016](../assets/images/image-20250515102342016.png)
-
-## 6.关于懒标记
+## 6. 关于懒标记
 
 ### 先修改该节点，再下传懒标记
 
@@ -546,9 +426,7 @@ l,r 任务范围，tl，tr当前来到范围
 
 ### 懒信息只下发一层，并且是该节点所包含的部分区间有修改才下传，否则只修改该节点，不改懒标记
 
-![image-20250515093751815](../assets/images/image-20250515093751815.png)
-
-
+![image-20250515093751815](../AppData/Roaming/Typora/typora-user-images/image-20250515093751815.png)
 
 ### 结束后的懒标记
 
@@ -586,56 +464,50 @@ l,r 任务范围，tl，tr当前来到范围
 
 因此，回答你的问题：**不是所有懒标记都会被清除**。只有那些后续操作触及到的节点上的懒标记才会被清除。未被触及的节点上的懒标记会一直存在，但这符合懒加载的设计原则且不影响正确性。
 
-
-
-
-
-
-
-
-
 # 语法规则
 
-## 1.typedef
+## 1. typedef
 
-typedef long long 别名
+`typedef long long 别名`
 
-## 3.字典的用法：
+## 2. 字典的用法
 
-![image-20250124201955858](../assets/images/image-20250124201955858.png)
+![image-20250124201955858](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250124201955858.png)
 
 如果 `a` 在 `map` 中不存在，`mp1[a]` 会自动创建一个空的 `vector<int>`，然后将 `b` 添加进去。
 
-## 4.set的作用：
+## 3. set的作用
 
 multiset允许元素重复
 
-![2e1fd37b8d64a965d5c89b8d04ea724b_720](../assets/images/2e1fd37b8d64a965d5c89b8d04ea724b_720.jpg)
+![2e1fd37b8d64a965d5c89b8d04ea724b_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\2e1fd37b8d64a965d5c89b8d04ea724b_720.jpg)
 
-![c6bc0a28b6453a3b4f0bcc072887b2f0_720](../assets/images/c6bc0a28b6453a3b4f0bcc072887b2f0_720.jpg)
+![c6bc0a28b6453a3b4f0bcc072887b2f0_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\c6bc0a28b6453a3b4f0bcc072887b2f0_720.jpg)
 
-## 5.int最大保存10的9次方
+## 4. int最大保存10的9次方
 
 2的正负31次方
 
-## 6.参数数据类型
+## 5. 参数数据类型
 
 在C++中，如果函数参数类型为`long long`，实际传参可以传`int`类型的值。这是因为C++支持隐式类型转换，当传递一个`int`类型的参数给`long long`类型的参数时，编译器会自动将`int`类型转换为`long long`类型，这被称为整型提升。
 
 需要注意的是，如果`int`类型的值超出了`long long`类型的表示范围，虽然转换仍会发生，但可能导致数据丢失或溢出，从而产生未定义的行为。因此，在传递参数时，应确保参数值在目标类型的有效范围内，以保证程序的正确性和可靠性。
 
-## 7.排序
+## 6. 排序
 
-### 1.sort的降序排序
+### 1. sort的降序排序
 
+```cpp
 sort(vec.begin(), vec.end(), greater<int>());
 // 结果：5, 4, 3, 2, 1
+```
 
-### 2.对数组排序
+### 2. 对数组排序
 
-![image-20250307235522746](../assets/images/image-20250307235522746.png)
+![image-20250307235522746](../AppData/Roaming/Typora/typora-user-images/image-20250307235522746.png)
 
-### 3.vector<pair<int,int>>  v排序
+### 3. `vector<pair<int,int>>` 排序
 
 ```cpp
     // 按第二个元素排序
@@ -650,10 +522,6 @@ sort(vec.begin(), vec.end(), greater<int>());
     // 输出：(2, 1) (3, 1) (3, 2) (1, 4)
 ```
 
-
-
-
-
 ```cpp
     vector<pair<int, int>> v = {{3, 2}, {1, 4}, {2, 1}, {3, 1}};
 
@@ -667,42 +535,45 @@ sort(vec.begin(), vec.end(), greater<int>());
     // 输出：(1, 4) (2, 1) (3, 1) (3, 2)
 ```
 
-### 4.自定义比较大小
+### 4. 自定义比较大小
 
+```cpp
 bool cmp(const pr& a, const pr& b) {
     if(a.sum != b.sum) return a.sum < b.sum;
     else return a.P > b.P; // sum相同时按P降序
 }
+```
 
-- 该函数实现了 **先按 `sum` 升序，`sum` 相同时按 `P` 降序** 的排序规则。
+> 该函数实现了先按 `sum` 升序，`sum` 相同时按 `P` 降序的排序规则。
 
-
-
-
-
-## 8.设置某给定位数的小数
+## 7. 设置某给定位数的小数
 
 **必须要fixed和setprecision同时存在**
 
+```cpp
 cout << fixed << setprecision(3) << 1.2345 << endl; // 1.235
 cout << setprecision(0) << 5.678 << endl; // 6（四舍五入到整数）
+```
 
-## 9.数组当参数
+## 8. 数组当参数
 
+```cpp
 void dfs(int* arr)
+```
 
-## 10.数组大小
+## 9. 数组大小
 
-![image-20250330170733632](../assets/images/image-20250330170733632.png)
+![image-20250330170733632](../AppData/Roaming/Typora/typora-user-images/image-20250330170733632.png)
 
-## 11.vector删除元素
+## 10. vector删除元素
 
 如果删除的是`vector`中间的某个元素，那么所有在该元素之后的元素都需要向前移动一位来填补空缺，因此时间复杂度为O(n)，其中n是`vector`的长度。如果删除的是`vector`末尾的元素，那么时间复杂度为O(1)，因为不需要移动其他元素。
 
 **删除一个元素**
 
+```cpp
 #include <vector>
-#include <algorithm>  // 需要包含 algorithm 以使用 find
+#include <algorithm>
 
 using namespace std;
 
@@ -717,9 +588,11 @@ auto it = find(vec.begin(), vec.end(), 3);
 if (it != vec.end()) {
     vec.erase(it);
 }
+```
 
 **删除多个元素**
 
+```cpp
 #include <vector>
 
 using namespace std;
@@ -728,8 +601,9 @@ vector<int> vec = {1, 2, 3, 4, 5};
 
 // 删除第2到第4个元素（索引1到3）
 vec.erase(vec.begin() + 1, vec.begin() + 4); // vec变为 {1, 5}
+```
 
-## 12.set和unordered_map的用法
+## 11. set和unordered_map的用法
 
 在 C++ 中，`unordered_map` 和 `set` 是两个非常常用的容器，分别用于存储键值对和不重复的元素集合。下面我会详细讲解这两个容器及它们的用途。
 
@@ -744,15 +618,11 @@ vec.erase(vec.begin() + 1, vec.begin() + 4); // vec变为 {1, 5}
 
 **示例：**
 
-```
-cpp复制编辑unordered_map<int, int> count;
+```cpp
+unordered_map<int, int> count;
 count[5]++;  // 如果键 5 存在，计数器加 1；如果不存在，自动初始化为 0 后再加 1
 cout << count[5];  // 输出 1
 ```
-
-
-
-
 
 还有种说法
 
@@ -760,8 +630,6 @@ cout << count[5];  // 输出 1
 
 - 如果存在，返回 `1`（因为 `unordered_map` 的键唯一）
 - 如果不存在，返回 `0`
-
-
 
 ### 2. `set<int> result;`
 
@@ -771,8 +639,8 @@ cout << count[5];  // 输出 1
 
 **示例：**
 
-```
-cpp复制编辑set<int> result;
+```cpp
+set<int> result;
 result.insert(5);  // 插入 5
 result.insert(3);  // 插入 3
 result.insert(5);  // 插入重复的 5（会被忽略）
@@ -783,168 +651,154 @@ for (int id : result) {
 }
 ```
 
-### 3.他们的erase操作
+### 3. 他们的erase操作
 
 erase操作平均时间复杂度是O(1)
 
 emplace操作也是O(1)
 
+## 12. cstring里的小技巧
 
+### memcpy
 
-## 13.cstring里的小技巧
+**函数原型**：
 
-函数原型cpp复制void* memcpy(void* dest, const void* src, size_t count);
-参数说明1.  dest ：目标内存区域的指针。2.  src ：源内存区域的指针。3.  count ：要复制的字节数。返回值返回目标内存区域的指针（即  dest ）。使用场景 memcpy  通常用于复制数组、结构体或其他内存块。它按字节逐个复制数据，不考虑数据类型。示例代码cpp复制#include <iostream>
-#include <cstring> // 包含 memcpy 的头文件
+```cpp
+void* memcpy(void* dest, const void* src, size_t count);
+```
+
+**参数说明**：
+- `dest`：目标内存区域的指针
+- `src`：源内存区域的指针
+- `count`：要复制的字节数
+
+**返回值**：返回目标内存区域的指针（即 `dest`）
+
+**使用场景**：`memcpy` 通常用于复制数组、结构体或其他内存块。它按字节逐个复制数据，不考虑数据类型。
+
+**示例代码**：
+
+```cpp
+#include <iostream>
+#include <cstring>
 
 int main() {
     int src[] = {1, 2, 3, 4, 5};
     int dest[5];
 
-    // 使用 memcpy 复制 src 到 dest
     memcpy(dest, src, sizeof(src));
-    
-    // 输出 dest 的内容
+
     for (int i = 0; i < 5; i++) {
         std::cout << dest[i] << " ";
     }
-    
+    // 输出：1 2 3 4 5
+
     return 0;
-
 }
-输出复制1 2 3 4 5
+```
 
+### strlen
 
+`int l = strlen(s1);` 算的是长度
 
+### 原地取反
 
+```cpp
+cin >> s1;
+int l = strlen(s1);
+memcpy(s2, s1, l);
+reverse(s2, s2 + l);
+```
 
-int l=strlen(s1);**算的是长度**
+- `string a = string b` 是深拷贝
+- `string` 有个默认初始化
 
-
-
-**原地取反**
-
- cin>>s1;
-
- int l=strlen(s1);
-
- memcpy(s2,s1,l);
-
- reverse(s2,s2+l);
-
-
-
-
-
-**string a=string b是深拷贝**
-
-
-
-**string有个默认初始化**
-
-
-
-
-
-
-
-## 14.子串与子序列
-
-
+## 13. 子串与子序列
 
 **子串：连续的字符序列，顺序必须与原字符串一致。**
 
 **子序列：按原有顺序选取的字符序列，可以不连续。**
 
+## 14. 基本数据类型都是深拷贝
 
+## 15. `vector a = b` 是深拷贝
 
-## 15.基本数据类型都是深拷贝
-
-## 16.vector a=b是深拷贝
-
-## 17.v.back()函数
+## 16. `v.back()` 函数
 
 取最后一个元素
 
-
-
 # 解题技巧
 
-## 1.区间
+## 1. 区间
 
-### 1.涉及到某些区间的边界效应
+### 1. 涉及到某些区间的边界效应
 
 **可以把区间设置成左开右闭**（少取一点）
 
-### 2.注意线段树的离散化
+### 2. 注意线段树的离散化
 
 排下序就行
 
-## 2.图
+## 2. 图
 
-### 1.怎么样存下所有可能的图，并且去重
+### 1. 怎么样存下所有可能的图，并且去重
 
-1.**这里的图是真的坐标系上的图！！！**
+1. **这里的图是真的坐标系上的图！**
 
-2.图用结构体的点(x,y)排序后的vector去存，并且要用set，如**set<vector<dot>> ans;**
+2. 图用结构体的点(x,y)排序后的vector去存，并且要用set，如 `set<vector<dot>> ans;`
 
-3.注意要统一把所有图的左上点或其他标记点存在坐标原点
+3. 注意要统一把所有图的左上点或其他标记点存在坐标原点
 
-4.注意这里，如下，可快速转化成set对象
+4. 注意这里，如下，可快速转化成set对象：
 
+```cpp
 void dfs(vector<dot> g, ll w) {
-    // 标准化并加入 ans
     dq(g);
     ans.insert(g);
-    if (w == 0) return;  // 已添加完 k 个点
-
-    // 枚举 g 中每个点的 4 个相邻位置
+    if (w == 0) return;
     set<dot> memo(g.begin(), g.end());
+```
 
-5.注意set里的count方法
+5. 注意set里的count方法：
 
+```cpp
 for (dot t : g) {
-        for (int i = 0; i < 4; i++) {
-            dot nxt = {t.x+xx[i], t.y+yy[i]};
-            **if (memo.count(nxt)) continue; // 已有点**
-            vector<dot> tmp = g;
-            tmp.push_back(nxt);
-            dq(tmp);
-            if (check(tmp)) {
-                dfs(tmp, w-1);
-            }
+    for (int i = 0; i < 4; i++) {
+        dot nxt = {t.x+xx[i], t.y+yy[i]};
+        if (memo.count(nxt)) continue; // 已有点
+        vector<dot> tmp = g;
+        tmp.push_back(nxt);
+        dq(tmp);
+        if (check(tmp)) {
+            dfs(tmp, w-1);
         }
     }
 }
+```
 
-6.坐标系的旋转90°算法
+6. 坐标系的旋转90°算法：
 
+```cpp
 struct dot {
     ll x, y;
     bool operator<(const dot& tmp) const {
         return x != tmp.x ? x < tmp.x : y < tmp.y;
     }
-    // 顺时针旋转 90°
-    void xz() { ll tx = x, ty = y; x = ty; y = -tx; }
-    // 垂直翻转（关于 x 轴）
-    void fx() { y = -y; }
-    // 水平翻转（关于 y 轴）
-    void fy() { x = -x; }
+    void xz() { ll tx = x, ty = y; x = ty; y = -tx; }   // 顺时针旋转 90°
+    void fx() { y = -y; }                                  // 垂直翻转（关于 x 轴）
+    void fy() { x = -x; }                                  // 水平翻转（关于 y 轴）
 };
+```
 
-**7.这里最重要的是dfs的一种在原基础上搜索的方法**
+7. **这里最重要的是dfs的一种在原基础上搜索的方法**
 
-原有的方格图，先用数列存下所有方格，对每个方格上下左右判断是否是否在数列中（set方法），如果在数列中，不加入，否则，递归地加入。
+原有的方格图，先用数列存下所有方格，对每个方格上下左右判断是否在数列中（set方法），如果在数列中，不加入，否则，递归地加入。
 
-    void dfs(vector<dot> g, ll w) {
-        // 1. 标准化当前点集，并加入结果集合 ans
-        dq(g);
-        ans.insert(g);
-    
-    // 2. 递归终止：已经添加完 w == k 次新点
+```cpp
+void dfs(vector<dot> g, ll w) {
+    dq(g);
+    ans.insert(g);
     if (w == 0) return;
-    
-    // 3. 准备一个集合 memo，快速判断某个坐标是否已在 g 中
     set<dot> memo(g.begin(), g.end());
     
     // 4. 枚举当前图形 g 中每一个点 t，以及它的四个邻居位置
@@ -969,54 +823,38 @@ struct dot {
     }
 }
 
-### 2.存图的边关系可以用unordered_map
+### 2. 存图的边关系可以用unordered_map
 
-**if (visited.find(node) != visited.end()) 用这个函数判断他是否找到了那条边**
+`if (visited.find(node) != visited.end())` 用这个函数判断他是否找到了那条边
 
+## 3. 二进制
 
-
-## 3.二进制
-
-### 1.二进制移位
+### 1. 二进制移位
 
 **注意负数不行，仅限正数**
-
-
-
-
 
 ```cpp
 	inline int ls(int p){return p<<1;}//左儿子 
 	inline int rs(int p){return p<<1|1;}//右儿子 
 ```
 
-
-
 1、此处的 `inline` 可以有效防止无需入栈的信息入栈，节省时间和空间。
 
-2、二进制位左移一位代表着数值 ×2，而如果左移完之后再或上 1，由于左移完之后最后一位二进制位上一定会是 0 ，所以 ∣1 等价于 +1 。
+2. 二进制位左移一位代表着数值 ×2，而如果左移完之后再或上 1，由于左移完之后最后一位二进制位上一定会是 0，所以 |1 等价于 +1。
 
-
-
+```cpp
 int result = num >> 1; // 等价于 num / 2（向下取整）
+```
 
-### 2.如何在二进制中减去最后一个1
+### 2. 如何在二进制中减去最后一个1
 
-直接进行(x-1)&x操作
+直接进行 `(x-1) & x` 操作
 
-### 3.自己在二进制运算中要懂得构建特殊二进制串
+### 3. 自己在二进制运算中要懂得构建特殊二进制串
 
-如1010101010
+如 `1010101010`
 
-
-
-
-
-
-
-
-
-## 4.状态压缩
+## 4. 状态压缩
 
 **状态压缩**是一种优化技术，通过高效的数据表示方式减少内存占用并提升计算效率，常用于处理包含多个状态的问题。以下是其核心要点：
 
@@ -1068,11 +906,7 @@ int result = num >> 1; // 等价于 num / 2（向下取整）
 
 状态压缩通过**位掩码**、**简化状态维度**等方式，将复杂状态转化为紧凑的数值形式，显著优化内存与计算效率。适用于动态规划、搜索及需要高效集合操作的场景，是处理中等规模组合问题的有效手段。
 
-
-
-
-
-## 5.记忆化搜索
+## 5. 记忆化搜索
 
 ### 什么时候使用（说人话版）
 
@@ -1182,10 +1016,10 @@ int result = num >> 1; // 等价于 num / 2（向下取整）
 
 记忆化搜索是**递归的自然优化延伸**，通过缓存子问题结果将指数级复杂度降为多项式级。它特别适合子问题重叠度高、状态转移复杂或难以直接设计DP填表顺序的问题，是动态规划的“递归版本”，也是算法竞赛和面试中的高频优化手段。
 
-## 6.双指针
+## 6. 双指针
 
 双指针重要的是要有数学规律，才能用
 
-## 7.最值的搜索——bfs
+## 7. 最值的搜索——BFS
 
 bfs非常擅长搜索最小值

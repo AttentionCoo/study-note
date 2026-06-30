@@ -1,20 +1,39 @@
-﻿# 基础
+# 深度学习学习笔记
+
+---
+
+## 📑 目录
+
+| 序号 | 章节 | 核心内容 |
+|------|------|----------|
+| 一 | [基础](#基础) | PyTorch基础、深度学习理解 |
+| 二 | [大模型](#大模型) | 大模型流程、Agent、提示工程、LangChain、向量搜索 |
+| 三 | [RAG](#rag) | 检索器、增强方法、评估基准、操作细节 |
+| 四 | [项目](#项目) | CRAG项目实战 |
+| 五 | [深度学习相关库](#深度学习相关库) | pandas、ChromaDB、jieba、Embedding模型 |
+| 六 | [医学](#医学) | 医学RAG、知识图谱 |
+| 七 | [算法](#算法) | 多模态CLIP、大语言模型Transformer |
+| 八 | [大模型应用](#大模型应用) | 自回归模型、RAG优化 |
+| 九 | [科研感悟](#科研感悟) | 科研方法论 |
+
+---
+
+# 基础
 
 ## 1. pytorch基础
 
 ### 1.1隐藏层用Sequential的定义方式（更简单）
 
-![image-20250119140506560](../../assets/images/image-20250119140506560.png)
+![image-20250119140506560](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250119140506560.png)
 
 **另一种**方式
 
-![image-20250119151647640](../../assets/images/image-20250119151647640.png)
-
+![image-20250119151647640](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250119151647640.png)
 
 
 ### 1.2两个向量的点积可以被看作衡量他们对齐程度的方法
 
-![image-20250209135000556](../../assets/images/image-20250209135000556.png)
+![image-20250209135000556](../AppData/Roaming/Typora/typora-user-images/image-20250209135000556.png)
 
 高维向量的方向对应了语义
 
@@ -37,7 +56,6 @@
 。这种分布随后可能会通过采样方法（如 top-k 采样或 nucleus sampling）来选择下一个词，从而继续文本的生成过程。
 
 
-
 ### 1.5对矩阵点积的更好理解
 
 这是一个非常好的问题！让我们通过分解矩阵运算的维度来详细理解这个梯度计算过程。首先明确几个关键维度：
@@ -51,31 +69,19 @@
 
 1. **转置操作**：
 
-   python
-
-   复制
-
-   ```
+   ```python
    batch_X.T  # 形状从 (40,3) 变为 (3,40)
    ```
 
 2. **矩阵乘法**：
 
-   python
-
-   复制
-
-   ```
+   ```python
    torch.matmul(batch_X.T, error)  # (3,40) × (40,1) = (3,1)
    ```
 
 3. **结果解释**：
 
-   python
-
-   复制
-
-   ```
+   ```python
    delta_w = 结果矩阵 / batch_size  # 最终形状保持 (3,1)
    ```
 
@@ -85,11 +91,7 @@
 
 - **计算方式**：对于每个特征（即`batch_X.T`的每一行）：
 
-  python
-
-  复制
-
-  ```
+  ```python
   delta_w[i] = sum(特征i在所有样本中的值 * 对应样本的误差) / batch_size
   ```
 
@@ -97,11 +99,7 @@
 
 **示例说明**（假设 batch_size=2）：
 
-python
-
-复制
-
-```
+```python
 # 样本特征矩阵（2个样本，3个特征）
 batch_X = [[x11, x12, x13],  # 样本1
            [x21, x22, x23]]  # 样本2
@@ -138,12 +136,8 @@ delta_w = [
 
 - 对于形状为 `(3,40)` 的 `batch_X.T` 和 `(40,1)` 的 `error`，矩阵乘法相当于：
 
-  python
-
-  复制
-
-  ```
-  for i in 0..2:  # 3个特征
+  ```python
+  for i in range(3):  # 3个特征
       delta_w[i] = sum(batch_X[:,i] * error.flatten())
   ```
 
@@ -154,7 +148,6 @@ delta_w = [
 1. 每个特征独立计算其梯度
 2. 充分利用了矩阵运算的并行优势
 3. 严格对应逻辑回归的梯度公式：∇w = X^T(Sigmoid(Xw + b) - y)/N
-
 
 
 ### 1.6item()方法
@@ -171,79 +164,34 @@ delta_w = [
 - **转换为 Python 类型**：
   返回的是一个 Python 数值（如 `float`），而非 PyTorch 张量，方便直接使用（例如打印、记录日志或参与数值计算）。
 
+### 1.7 参数初始化方法
 
-
-
-
-
-
-
-
-
-
-
-
-### 1.7之前的方法：
-
-![image-20250121172613055](../../assets/images/image-20250121172613055.png)
+![image-20250121172613055](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250121172613055.png)
 
 现在方法一：
 
-![image-20250121172827337](../../assets/images/image-20250121172827337.png)
+![image-20250121172827337](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250121172827337.png)
 
 方法二，用列表**（更多灵活性，但是更麻烦）**：
 
-![image-20250121173141823](../../assets/images/image-20250121173141823.png)
-
-
-
-
-
+![image-20250121173141823](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250121173141823.png)
 
 
 ### 1.8 LayerNorm函数
 
-![111045dd197522f5409e935ca842c652_720](../../assets/images/111045dd197522f5409e935ca842c652_720.jpg)
+![111045dd197522f5409e935ca842c652_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\111045dd197522f5409e935ca842c652_720.jpg)
 
 ### 1.9 Embedding参数
 
-![1c48d54f13c3f1d54dbad08e6d882b6d_720](../../assets/images/1c48d54f13c3f1d54dbad08e6d882b6d_720.jpg)
+![1c48d54f13c3f1d54dbad08e6d882b6d_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\1c48d54f13c3f1d54dbad08e6d882b6d_720.jpg)
 
 ## 2. 深度学习的理解
 
 ### 2.1 深度学习与机器学习
 
-```
-机器学习要自己提取特征，深度学习它自己用特征提取器提取
-```
+> 机器学习要自己提取特征，深度学习它自己用特征提取器提取
 
-
-
-## 3. 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# **大模型**
+# 大模型
 
 ## 1. 基础
 
@@ -251,84 +199,79 @@ delta_w = [
 
 ### 大模型流程
 
-![image-20250131194035347](../../assets/images/image-20250131194035347.png)
+![image-20250131194035347](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131194035347.png)
 
 transformer架构让大模型有了自己的思想，让它可以回答问题。
 
-![image-20250131194512463](../../assets/images/image-20250131194512463.png)
+![image-20250131194512463](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131194512463.png)
 
-![image-20250131194652620](../../assets/images/image-20250131194652620.png)
+![image-20250131194652620](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131194652620.png)
 
-![image-20250131195807062](../../assets/images/image-20250131195807062.png)
+![image-20250131195807062](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131195807062.png)
 
 ### Agent
 
-![image-20250131201748788](../../assets/images/image-20250131201748788.png)
+![image-20250131201748788](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131201748788.png)
 
-![image-20250131202056421](../../assets/images/image-20250131202056421.png)
+![image-20250131202056421](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131202056421.png)
 
-![image-20250131210809420](../../assets/images/image-20250131210809420.png)
+![image-20250131210809420](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131210809420.png)
 
-![image-20250131211028307](../../assets/images/image-20250131211028307.png)
+![image-20250131211028307](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131211028307.png)
 
-![image-20250131211619242](../../assets/images/image-20250131211619242.png)
+![image-20250131211619242](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131211619242.png)
 
-![image-20250131213410331](../../assets/images/image-20250131213410331.png)
+![image-20250131213410331](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131213410331.png)
 
-### Agent相当于代理人，大脑还是llm
+### Agent 相当于代理人，大脑还是 LLM
 
-![image-20250202150316304](../../assets/images/image-20250202150316304.png)
+![image-20250202150316304](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250202150316304.png)
 
-![image-20250202152409381](../../assets/images/image-20250202152409381.png)
+![image-20250202152409381](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250202152409381.png)
 
 ### self ask 不是通用框架，而是一些加上自问自答更好的模型需要
 
 如下是self ask
 
-![image-20250202153513963](../../assets/images/image-20250202153513963.png)
+![image-20250202153513963](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250202153513963.png)
 
-![image-20250202154302706](../../assets/images/image-20250202154302706.png)
+![image-20250202154302706](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250202154302706.png)
 
 模型能力定下后，Agent通过加入自我评估和反思等，进一步提高解决问题能力（简单的问题甚至可以不用工具）。
 
 上述reflection进行反思（如果不反思，会导致逐渐偏离原问题）。
 
 
-
-
-
 ### 提示的重要性
 
-![image-20250204225440045](../../assets/images/image-20250204225440045.png)
+![image-20250204225440045](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204225440045.png)
 
 提示越冗余，结果越稳定
 
 
-
-![image-20250204230855559](../../assets/images/image-20250204230855559.png)
+![image-20250204230855559](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204230855559.png)
 
 ### 少量样本不会改变模型本身，但是fine-tuning会改变本身
 
-![image-20250204231302023](../../assets/images/image-20250204231302023.png)
+![image-20250204231302023](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204231302023.png)
 
 ### 各种器
 
-![image-20250204231629321](../../assets/images/image-20250204231629321.png)
+![image-20250204231629321](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204231629321.png)
 
-![image-20250204231831687](../../assets/images/image-20250204231831687.png)
+![image-20250204231831687](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204231831687.png)
 
-![image-20250205120837204](../../assets/images/image-20250205120837204.png)
+![image-20250205120837204](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205120837204.png)
 
-![image-20250205135451677](../../assets/images/image-20250205135451677.png)
+![image-20250205135451677](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205135451677.png)
 
-![image-20250205142500570](../../assets/images/image-20250205142500570.png)
+![image-20250205142500570](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205142500570.png)
 
-![image-20250205143000994](../../assets/images/image-20250205143000994.png)
+![image-20250205143000994](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205143000994.png)
 
-![image-20250205143222475](../../assets/images/image-20250205143222475.png)
+![image-20250205143222475](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205143222475.png)
 
-![image-20250205143511524](../../assets/images/image-20250205143511524.png)
-
+![image-20250205143511524](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205143511524.png)
 
 
 ### 提示词
@@ -336,21 +279,18 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 提示词起到对大模型进行清洗和筛选的作用。
 
 
-
-
-
-![image-20250205155552098](../../assets/images/image-20250205155552098.png)
+![image-20250205155552098](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205155552098.png)
 
 给模型思考时间：1.给模型足够信息
 
 ​                               2.复杂的步骤中，分步骤引导模型
 
-![image-20250205160914917](../../assets/images/image-20250205160914917.png)
+![image-20250205160914917](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205160914917.png)
 
+```python
 from langchain.prompts import FewShotPromptTemplate, PromptTemplate
 
-### 定义示例集合
-
+# 定义示例集合
 examples = [
     {
         "input": "苹果",
@@ -362,26 +302,14 @@ examples = [
     }
 ]
 
-
-
-
-
-定义单个示例的格式
-
+# 定义单个示例的格式
 example_template = """
 输入：{input}
 输出：{output}
 """
 example_prompt = PromptTemplate.from_template(example_template)
 
-
-
-
-
-
-
-组合成 Few-Shot Prompt
-
+# 组合成 Few-Shot Prompt
 few_shot_prompt = FewShotPromptTemplate(
     examples=examples,
     example_prompt=example_prompt,
@@ -390,68 +318,48 @@ few_shot_prompt = FewShotPromptTemplate(
     input_variables=["noun"],
 )
 
-
-
-
-
-使用 Prompt
-
+# 使用 Prompt
 filled_prompt = few_shot_prompt.format(noun="大象")
 print(filled_prompt)
-
-
-
-
-
+```
 
 
 ### AI知识库类应用所产生的工作流
 
-![image-20250207145326563](../../assets/images/image-20250207145326563.png)
+![image-20250207145326563](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250207145326563.png)
 
-![image-20250207150347171](../../assets/images/image-20250207150347171.png)
-
+![image-20250207150347171](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250207150347171.png)
 
 
 ## Langchain
 
 ### 链结构
 
-![image-20250205144509184](../../assets/images/image-20250205144509184.png)
+![image-20250205144509184](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205144509184.png)
 
 多链结构，代码决定选择哪条链去解决问题最好？
-
 
 
 ### Langchain提示词模板
 
 
+![image-20250204225702840](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204225702840.png)
 
-![image-20250204225702840](../../assets/images/image-20250204225702840.png)
+![image-20250204230111157](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204230111157.png)
 
-![image-20250204230111157](../../assets/images/image-20250204230111157.png)
-
-![image-20250204230630974](../../assets/images/image-20250204230630974.png)
-
-
-
-
-
+![image-20250204230630974](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204230630974.png)
 
 
 ### 历史记录模块
 
-![image-20250209191745071](../../assets/images/image-20250209191745071.png)
+![image-20250209191745071](../AppData/Roaming/Typora/typora-user-images/image-20250209191745071.png)
 
 说白了：就是把之前的聊天记录一并发给它
 
 
-
-
-
 ### Agent非常重要
 
-![image-20250209192531641](../../assets/images/image-20250209192531641.png)
+![image-20250209192531641](../AppData/Roaming/Typora/typora-user-images/image-20250209192531641.png)
 
 react:这里是reasoning and act
 
@@ -484,12 +392,7 @@ RouterChain由两部分构成：
 
 那么检索的模型也要包含client
 
-![image-20250617151606284](../../assets/images/image-20250617151606284.png)
-
-
-
-
-
+![image-20250617151606284](../AppData/Roaming/Typora/typora-user-images/image-20250617151606284.png)
 
 
 ## langchain基于向量的搜索索引
@@ -573,7 +476,6 @@ RouterChain由两部分构成：
    - 返回最相似的文本片段。
 
 
-
 ### 每个文本嵌入向量维度解释
 
 每个文本的嵌入向量维度表示该文本在 **向量空间** 中的 **表示**。每个向量的维度是由嵌入模型决定的，通常越高维度的向量能表达越丰富的语义信息。在 OpenAI 的嵌入模型中，每个文本的嵌入通常是一个固定长度的向量，具体维度取决于模型。
@@ -601,7 +503,6 @@ RouterChain由两部分构成：
 - **文本聚类**：通过将多个文本嵌入为向量并进行聚类，可以将相似主题的文本分为一类，从而实现更高效的文本分类或信息检索。
 
 
-
 ### search搜索匹配向量
 
 因为 Faiss 要求查询输入是 `(num_queries, dimension)` 形状的数组，所以`.reshape((1, embed_dim))` 把向量转换为 **二维格式**，
@@ -610,17 +511,12 @@ RouterChain由两部分构成：
 
 在 Faiss 中，`index_innerproduct.search(...)` 返回两个数组：
 
-```
-python
-
-
-复制编辑
+```python
 data, idx = index_innerproduct.search(query_embed[0].reshape((1, embed_dim)), topk)
 ```
 
 - `data`：形状是 `(1, topk)`，包含 **匹配度分数**（通常是内积或 L2 距离）。
 - `idx`：形状是 `(1, topk)`，包含 **最相似文本的索引（整数）**，这些索引可以用来访问 `texts` 中的原始文本
-
 
 
 ### 索引的不同
@@ -637,12 +533,8 @@ data, idx = index_innerproduct.search(query_embed[0].reshape((1, embed_dim)), to
 
 **添加数据到索引：**
 
-```
-python
-
-
-复制编辑
-index_innerproduct.add(np_embeddings)  
+```python
+index_innerproduct.add(np_embeddings)
 ```
 
 这行代码的作用是 **把 `np_embeddings`（所有文本的向量）添加到 Faiss 索引中**。
@@ -652,22 +544,13 @@ index_innerproduct.add(np_embeddings)
 
 ### **2. `idx` 里的索引（最相似文本的索引）**
 
-```
-python
-
-
-复制编辑
+```python
 data, idx = index_innerproduct.search(query_embed[0].reshape((1, embed_dim)), topk)
 ```
 
 - `idx` 是 Faiss 进行相似性搜索后返回的结果。
 - `idx` 里存储的是 **Faiss 索引中的向量编号（整数）**。
 - 这些编号 **对应 `texts` 列表中的文本索引**
-
-
-
-
-
 
 
 ## RAG
@@ -768,24 +651,20 @@ rag处理代码
 来 RAG 研究和应用的几个 潜在方向。1）增强方法的新颖设计：现有研究已 经探索了检索器和生成器之间的各种交互模式。然 而，由于这两个组件的目标不同，实际的增强过程 对最终的生成结果有重大影响。对更先进的增强基 础的研究有望充分释放 RAG 的潜力。2）灵活的 RAG 管道：RAG 系统正在逐步采用灵活的管道， 例如递归、自适应和迭代 RAG。除了对每个组件进 行适当的调整和精心设计之外，检索源、检索器、 生成器和 RAG 子系统的独特组合有望处理复杂的 任务并提高整体性能。
 
 
-
 ### 操作细节
-
 
 
 #### 问题类型
 
-![image-20250219170647636](../../assets/images/image-20250219170647636.png)
-
+![image-20250219170647636](../AppData/Roaming/Typora/typora-user-images/image-20250219170647636.png)
 
 
 #### 脚本执行
 
 
-
 这是脚本
 
-![image-20250310145958384](../../assets/images/image-20250310145958384.png)
+![image-20250310145958384](../AppData/Roaming/Typora/typora-user-images/image-20250310145958384.png)
 
 5. 脚本的作用和运行方式
 
@@ -801,21 +680,13 @@ rag处理代码
 
   2. 保证脚本具有执行权限：
 
-     ```
-     狂欢
-     
-     
-     复制編輯
+     ```bash
      chmod +x run_crag_inference.sh
      ```
 
   3. 执行脚本：
 
-     ```
-     狂欢
-     
-     
-     复制編輯
+     ```bash
      ./run_crag_inference.sh
      ```
 
@@ -830,7 +701,6 @@ rag处理代码
 ### 为什么需要加入正确和错误知识一起训练
 
 
-
 **正确知识和错误知识的结合**有助于：
 
 1. **训练模型区分正确和错误信息**（如QA、搜索引擎优化）。
@@ -841,17 +711,13 @@ rag处理代码
 这类数据对于**提升AI在真实场景中的表现**非常重要，特别是**避免错误传播**。
 
 
-
-
-
 ### 相似性做文章的地方
 
-![image-20250421205735441](../../assets/images/image-20250421205735441.png)
+![image-20250421205735441](../AppData/Roaming/Typora/typora-user-images/image-20250421205735441.png)
 
 ### 几个检索器特点
 
  🔚 总结对比
-
 
 
 | 方法   | 是否语义理解 | 是否训练模型 | 适用场景       | 优点                   | 缺点           |
@@ -869,29 +735,22 @@ rag处理代码
 - 🧠 追求语义匹配精度，推荐 **BGE**（多语言）或 **M3E**（中文）
 
 
-
-
-
-
-
-
-
 # 项目
 
 ## 1.CRAG
 
 ### 1.解释
 
-![image-20250314225733300](../../assets/images/image-20250314225733300.png)
-
+![image-20250314225733300](../AppData/Roaming/Typora/typora-user-images/image-20250314225733300.png)
 
 
 代码解释
 
-![image-20250314225558492](../../assets/images/image-20250314225558492.png)
+![image-20250314225558492](../AppData/Roaming/Typora/typora-user-images/image-20250314225558492.png)
 
-### 2.tokenizer
+### 2. tokenizer
 
+```python
 train_data = tokenizer(
     data.content.to_list(),
     padding="max_length",
@@ -899,37 +758,35 @@ train_data = tokenizer(
     truncation=True,
     return_tensors="pt"
 )
+```
 
+加载模型：
 
-
-    tokenizer = T5Tokenizer.from_pretrained("t5-large")
-    model = T5ForSequenceClassification.from_pretrained("t5-large", num_labels=1)
-
+```python
+tokenizer = T5Tokenizer.from_pretrained("t5-large")
+model = T5ForSequenceClassification.from_pretrained("t5-large", num_labels=1)
+```
 
 
 **5. 加载模型和数据**
 
-```
-python复制编辑    tokenizer = T5Tokenizer.from_pretrained("t5-large")
-    model = T5ForSequenceClassification.from_pretrained("t5-large", num_labels=1)
+```python
+tokenizer = T5Tokenizer.from_pretrained("t5-large")
+model = T5ForSequenceClassification.from_pretrained("t5-large", num_labels=1)
 ```
 
 - 加载 `T5Tokenizer` 和 `T5ForSequenceClassification`（T5的分类版本，设置 `num_labels=1` 进行**回归任务**）。
 
-```
-python
-
-
-复制编辑
-    train_data, train_label = data_preprocess(train_file, tokenizer)
+```python
+train_data, train_label = data_preprocess(train_file, tokenizer)
 ```
 
 - 调用 `data_preprocess` 获取训练数据 `train_data` 和 `train_label`。
 
-```
-python复制编辑    batch_size = 12
-    train = TensorDataset(train_data["input_ids"], train_data["attention_mask"], torch.tensor(train_label))
-    train_dataloader = DataLoader(train, batch_size=batch_size, shuffle=True, sampler=None)
+```python
+batch_size = 12
+train = TensorDataset(train_data["input_ids"], train_data["attention_mask"], torch.tensor(train_label))
+train_dataloader = DataLoader(train, batch_size=batch_size, shuffle=True, sampler=None)
 ```
 
 - 组装 `TensorDataset`，包括：
@@ -938,13 +795,13 @@ python复制编辑    batch_size = 12
   - `label`（标签）
 - 用 `DataLoader` 生成批量数据
 
-```
-python复制编辑    optimizer = AdamW(model.parameters(), lr=1e-4)
-    num_epochs = 8
-    num_training_steps = num_epochs * len(train_dataloader)
-    lr_scheduler = get_scheduler(
-        name="linear", optimizer=optimizer, num_warmup_steps=0, num_training_steps=num_training_steps
-    )
+```python
+optimizer = AdamW(model.parameters(), lr=1e-4)
+num_epochs = 8
+num_training_steps = num_epochs * len(train_dataloader)
+lr_scheduler = get_scheduler(
+    name="linear", optimizer=optimizer, num_warmup_steps=0, num_training_steps=num_training_steps
+)
 ```
 
 - **优化器**：AdamW（适合 Transformer 训练）
@@ -954,39 +811,39 @@ python复制编辑    optimizer = AdamW(model.parameters(), lr=1e-4)
 
 **6. 模型训练**
 
-```
-python复制编辑    device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
-    model.to(device)
+```python
+device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+model.to(device)
 ```
 
 - 检测是否有可用的GPU，如果有则使用，否则用CPU。
 
-```
-python复制编辑    for i, epoch in enumerate(range(num_epochs)):
-        total_loss = 0
-        model.train()
-        for step, batch in enumerate(train_dataloader):
-            if step % 10 == 0 and not step == 0:
-                print("step: ",step, "  loss:",total_loss/(step*batch_size))
+```python
+for i, epoch in enumerate(range(num_epochs)):
+    total_loss = 0
+    model.train()
+    for step, batch in enumerate(train_dataloader):
+        if step % 10 == 0 and not step == 0:
+            print("step: ", step, "  loss:", total_loss / (step * batch_size))
 ```
 
 - 进入训练循环，每 `10` 步打印一次 `loss`。
 
-```
-python复制编辑            b_input_ids = batch[0].to(device)
-            b_input_mask = batch[1].to(device)
-            b_labels = batch[2].to(device)
+```python
+b_input_ids = batch[0].to(device)
+b_input_mask = batch[1].to(device)
+b_labels = batch[2].to(device)
 
-            model.zero_grad()        
-            outputs = model(b_input_ids, attention_mask=b_input_mask, labels=b_labels)
-            loss = outputs.loss   
-            loss.mean().backward()
-            total_loss += loss.mean().item()
-            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+model.zero_grad()
+outputs = model(b_input_ids, attention_mask=b_input_mask, labels=b_labels)
+loss = outputs.loss
+loss.mean().backward()
+total_loss += loss.mean().item()
+torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
 
-            optimizer.step()
-            lr_scheduler.step()
-            optimizer.zero_grad()
+optimizer.step()
+lr_scheduler.step()
+optimizer.zero_grad()
 ```
 
 - **前向传播**：
@@ -1002,14 +859,14 @@ python复制编辑            b_input_ids = batch[0].to(device)
 
 ------
 
- **7. 保存模型**
+**7. 保存模型**
 
-```
-python复制编辑        avg_train_loss = total_loss / len(train_dataloader)      
-        print("avg_loss:", avg_train_loss)
+```python
+avg_train_loss = total_loss / len(train_dataloader)
+print("avg_loss:", avg_train_loss)
 
-        model.save_pretrained(args.save_path + "/ep{}".format(i))
-        tokenizer.save_pretrained(args.save_path + "/ep{}".format(i))
+model.save_pretrained(args.save_path + "/ep{}".format(i))
+tokenizer.save_pretrained(args.save_path + "/ep{}".format(i))
 ```
 
 - 每个 `epoch` 结束后，保存**模型和分词器**。
@@ -1028,12 +885,9 @@ python复制编辑        avg_train_loss = total_loss / len(train_dataloader)
 6. 每个 `epoch` 结束后，保存模型和分词器
 
 
+### 3. 计算余弦
 
-### 3.计算余弦
-
-### 3. **归一化张量**
-
-Python复制
+#### 归一化张量
 
 ```python
 normalized_tensor_1 = tensor_1 / tensor_1.norm(dim=-1, keepdim=True)
@@ -1047,28 +901,10 @@ normalized_tensor_2 = tensor_2 / tensor_2.norm(dim=-1, keepdim=True)
 - 将每个张量除以它的 L2 范数，使得每个向量的长度变为 1（单位向量）。
 
 
-
-
-
 ### 4.jsonlines
 
 1. **处理大数据集**：适合处理非常大的数据集，因为可以逐行读取，而不需要一次性加载整个文件。
 2. **流式处理**：可以用于流式数据处理，例如从网络流中逐行读取 JSON 数据。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 # 深度学习相关库
@@ -1085,7 +921,6 @@ train = pd.read_csv(DATA_PATH + 'train.csv', parse_dates=['date'])
 
 - **`parse_dates=['date']`**：将名为 `'date'` 的列转换为 datetime 类型。
 - 转换后，`train['date']` 的数据类型会变为 `datetime64[ns]`，而非字符串。
-
 
 
 1. **后续处理更高效**
@@ -1519,20 +1354,13 @@ res = collection.query(
 - **metadata** 是“上下文标签”，不影响向量计算，但能做过滤和结果解释，是 RAG 系统中非常重要的“溯源信息”。
 
 
-
-
-
 ## 3. **jieba**
 
 `jieba` 是一个中文分词库，常用于中文文本的切分和处理。它通过将中文句子切分成一个个有意义的词语，帮助计算机理解中文文本的结构。在自然语言处理（NLP）中，分词是中文处理中的基础步骤。
 
 - **安装**：
 
-  ```
-  bash
-  
-  
-  复制编辑
+  ```bash
   pip install jieba
   ```
 
@@ -1548,8 +1376,8 @@ res = collection.query(
 
 - **用法**：
 
-  ```
-  python复制编辑import jieba
+  ```python
+  import jieba
   text = "我来到北京清华大学"
   result = jieba.cut_for_search(text)
   print(" ".join(result))
@@ -1558,7 +1386,6 @@ res = collection.query(
   输出：
 
   ```
-  复制编辑
   我 来到 北京 清华 大学
   ```
 
@@ -1566,18 +1393,7 @@ res = collection.query(
 
 ## 4. Embedding模型选择
 
-![image-20250731185516271](../../assets/images/image-20250731185516271.png)
-
-
-
-
-
-
-
-
-
-
-
+![image-20250731185516271](../AppData/Roaming/Typora/typora-user-images/image-20250731185516271.png)
 
 
 # 医学
@@ -1586,34 +1402,27 @@ res = collection.query(
 
 ### 一些文献
 
-![image-20250508172717363](../../assets/images/image-20250508172717363.png)
+![image-20250508172717363](../AppData/Roaming/Typora/typora-user-images/image-20250508172717363.png)
 
 ### 知识图谱
 
-![image-20250603163838384](../../assets/images/image-20250603163838384.png)
+![image-20250603163838384](../AppData/Roaming/Typora/typora-user-images/image-20250603163838384.png)
 
 数据集来源
 
-![image-20250525001846113](../../assets/images/image-20250525001846113.png)
+![image-20250525001846113](../AppData/Roaming/Typora/typora-user-images/image-20250525001846113.png)
 
 节点关系
 
-![image-20250525001941639](../../assets/images/image-20250525001941639.png)
+![image-20250525001941639](../AppData/Roaming/Typora/typora-user-images/image-20250525001941639.png)
 
 别人的想法
 
-![image-20250525002102219](../../assets/images/image-20250525002102219.png)
+![image-20250525002102219](../AppData/Roaming/Typora/typora-user-images/image-20250525002102219.png)
 
 ### 论文
 
-![image-20250525205105062](../../assets/images/image-20250525205105062.png)
-
-
-
-
-
-
-
+![image-20250525205105062](../AppData/Roaming/Typora/typora-user-images/image-20250525205105062.png)
 
 
 # 算法
@@ -1688,7 +1497,6 @@ res = collection.query(
 这个通才就能基于它庞大的知识库和强大的联想能力，给出答案。**这就是零样本迁移**——模型迁移的不是某个具体任务的参数，而是迁移了**用语言理解和连接视觉世界的基础能力**。
 
 
-
 #### **训练流程详解**
 
 ##### **第1步：准备海量“图文对”数据**
@@ -1727,21 +1535,6 @@ res = collection.query(
 - 用新的批次重复这个过程，在数亿的数据上迭代数轮。
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 ## 大语言模型
 
 ### 1. Transformer基础
@@ -1756,19 +1549,19 @@ res = collection.query(
 
 注意力机制是Transformer模型的基石，其数学形式如下：
 
-\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\mathsf{T}}{\sqrt{d_k}}\right) V
+$$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\mathsf{T}}{\sqrt{d_k}}\right) V$$
 
 公式中的三个矩阵由输入序列通过线性变换得到：
 
-· Q（Query，查询）：代表当前关注点，可以理解为“我正在寻找什么信息”。
-· K（Key，键）：代表序列中每个位置提供的“信息标签”，可以理解为“我这里有什么信息”。
-· V（Value，值）：代表序列中每个位置的实际“信息内容”。
+- **Q（Query，查询）**：代表当前关注点，可以理解为"我正在寻找什么信息"。
+- **K（Key，键）**：代表序列中每个位置提供的"信息标签"，可以理解为"我这里有什么信息"。
+- **V（Value，值）**：代表序列中每个位置的实际"信息内容"。
 
 计算过程分为三步：
 
-1. 计算相关性：通过 QK^\mathsf{T} 计算查询与所有键的点积，得到注意力分数矩阵，其形状为 [序列长度, 序列长度]。该矩阵的每个元素表示一个位置对另一个位置的关注程度。
-2. 缩放与归一化：除以 \sqrt{d_k}（d_k 是键向量的维度）防止分数过大导致梯度消失；然后应用 softmax 函数，将每一行的分数转换为概率分布，得到注意力权重矩阵，每一行的和为1。
-3. 加权求和：用注意力权重矩阵对值矩阵 V 进行加权求和，得到最终的输出矩阵。
+1. **计算相关性**：通过 $QK^\mathsf{T}$ 计算查询与所有键的点积，得到注意力分数矩阵，其形状为 `[序列长度, 序列长度]`。该矩阵的每个元素表示一个位置对另一个位置的关注程度。
+2. **缩放与归一化**：除以 $\sqrt{d_k}$（$d_k$ 是键向量的维度）防止分数过大导致梯度消失；然后应用 softmax 函数，将每一行的分数转换为概率分布，得到注意力权重矩阵，每一行的和为1。
+3. **加权求和**：用注意力权重矩阵对值矩阵 $V$ 进行加权求和，得到最终的输出矩阵。
 
 ---
 
@@ -1788,40 +1581,37 @@ res = collection.query(
 
 1. 从矩阵到下一个词的概率分布
 
-· 当模型处理当前序列（例如已生成的前 t 个词）时，经过多层Transformer计算，最后一层输出的矩阵中，最后一个位置的向量（记为 h_t）包含了当前已生成序列的全部信息，用于预测下一个词。
-· 这个向量通过一个语言模型头（通常是一个线性层 + softmax）映射到词表大小的向量：
-  P(\text{下一个词}) = \text{softmax}(h_t W + b)
-  其中 W 和 b 是可训练参数。输出向量的每个维度对应词表中的一个词，数值表示该词作为下一个词的概率。
+- 当模型处理当前序列（例如已生成的前 $t$ 个词）时，经过多层Transformer计算，最后一层输出的矩阵中，最后一个位置的向量（记为 $h_t$）包含了当前已生成序列的全部信息，用于预测下一个词。
+- 这个向量通过一个语言模型头（通常是一个线性层 + softmax）映射到词表大小的向量：
+
+  $$P(\text{下一个词}) = \text{softmax}(h_t W + b)$$
+
+  其中 $W$ 和 $b$ 是可训练参数。输出向量的每个维度对应词表中的一个词，数值表示该词作为下一个词的概率。
 
 2. 选择下一个词
 
 根据概率分布，模型选择一个词作为输出。常见的策略包括：
 
-· 贪婪搜索：直接选择概率最高的词。
-· 随机采样：按照概率分布随机抽样，增加多样性。
-· 束搜索：保留多个候选序列，综合评估后选择最优。
+- **贪婪搜索**：直接选择概率最高的词。
+- **随机采样**：按照概率分布随机抽样，增加多样性。
+- **束搜索**：保留多个候选序列，综合评估后选择最优。
 
 3. 循环生成完整句子
 
-· 将选出的新词拼接到输入序列末尾，形成新的输入序列。
-· 将新序列再次输入模型，重复上述步骤，得到再下一个词的概率分布。
-· 不断重复，直到模型预测出特殊的结束符（EOS，End-of-Sequence token），或达到最大长度限制。
+- 将选出的新词拼接到输入序列末尾，形成新的输入序列。
+- 将新序列再次输入模型，重复上述步骤，得到再下一个词的概率分布。
+- 不断重复，直到模型预测出特殊的结束符（EOS，End-of-Sequence token），或达到最大长度限制。
 
 ---
 
 四、关键理解要点
 
-· 注意力矩阵 的作用是让每个位置的表示都融入上下文，这是模型“理解”语言的基础。
-· 生成过程 是逐词迭代的，每一步都基于当前整个已生成序列重新计算注意力矩阵，从而让模型能够利用最新的上下文进行下一步预测。
-· 从矩阵到词 的转换由一个分类层完成，它将最终的语义向量映射到词表空间，输出概率分布。
-· 整个流程没有“一次性”生成一句话，而是一步一步地“猜”出下一个最合适的词。
+- **注意力矩阵**的作用是让每个位置的表示都融入上下文，这是模型"理解"语言的基础。
+- **生成过程**是逐词迭代的，每一步都基于当前整个已生成序列重新计算注意力矩阵，从而让模型能够利用最新的上下文进行下一步预测。
+- **从矩阵到词**的转换由一个分类层完成，它将最终的语义向量映射到词表空间，输出概率分布。
+- 整个流程没有"一次性"生成一句话，而是一步一步地"猜"出下一个最合适的词。
 
 通过这种方式，大模型能够生成连贯、符合上下文的自然语言文本。
-
-
-
-
-
 
 
 #### 1.1 原向量要乘以一个矩阵才能得到查询(query)
@@ -1829,15 +1619,9 @@ res = collection.query(
 这样才能得到包含一定（注意是一定）上下文信息的向量，实质是将嵌入向量映射到相应的低维空间
 
 
-
 下面这张图才是都整合了前面的信息（图的左边V是乘以词嵌入的value）
 
-![image-20250209154740877](../../assets/images/image-20250209154740877.png)
-
-
-
-
-
+![image-20250209154740877](../AppData/Roaming/Typora/typora-user-images/image-20250209154740877.png)
 
 
 #### 1.2 每种不同的上下文更新方式，键矩阵和查询矩阵参数都会变，
@@ -1845,9 +1629,7 @@ res = collection.query(
 值矩阵也会因嵌入值更新值而改变
 
 
-
-![image-20250209162531504](../../assets/images/image-20250209162531504.png)
-
+![image-20250209162531504](../AppData/Roaming/Typora/typora-user-images/image-20250209162531504.png)
 
 
 #### 1.3 n个注意头意味着n个q,k,v矩阵
@@ -1856,64 +1638,12 @@ res = collection.query(
 
 多加几个头更精确（就多加几个delta）
 
-![image-20250209162936158](../../assets/images/image-20250209162936158.png)
-
+![image-20250209162936158](../AppData/Roaming/Typora/typora-user-images/image-20250209162936158.png)
 
 
 #### 1.5 深层理解
 
-![image-20250209163459471](../../assets/images/image-20250209163459471.png)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+![image-20250209163459471](../AppData/Roaming/Typora/typora-user-images/image-20250209163459471.png)
 
 
 # 大模型应用
@@ -1957,17 +1687,11 @@ GPT是：
 - 如果没有整个历史，模型就像失忆一样，无法保持一致性。
 
 
-
 #### GPT是自监督模型
 
 #### 大数据集起作用原理
 
 这个看似简单的任务，当数据量（整个互联网）和模型规模（千亿级参数）达到临界点后，会产生质变，即 **“涌现能力”**。
-
-
-
-
-
 
 
 ### 1.2 传统机器学习模型
@@ -1982,19 +1706,13 @@ RNN（循环神经网络）的核心思想是：**每个时间步只能看到当
 
 **Transformer（自注意力）：**
 
-text
-
 ```
 输入: [词1, 词2, 词3, 词4, 词5]
 处理词5时: 可以直接看到[词1, 词2, 词3, 词4, 词5]的全部
 → 建立任意两个词的直接连接
 ```
 
-
-
 **RNN（单向）：**
-
-text
 
 ```
 时间线: t1      t2      t3      t4      t5
@@ -2005,33 +1723,7 @@ text
 ```
 
 
-
 **关键**：在t5时刻，RNN只能直接看到**词5**和**h4**。h4是包含了词1-词4信息的“摘要”，但不是原始信息本身。
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ### 1.3 **大模型学习的是组合规律**
@@ -2053,69 +1745,43 @@ text
 这叫**组合泛化（compositional generalization）**。
 
 
-
-
-
-
-
 ## 2. RAG
 
 ### 2.1 如何提高
 
 #### 1. 检索前
 
-![image-20260206212003053](../../assets/images/image-20260206212003053.png)
+![image-20260206212003053](../AppData/Roaming/Typora/typora-user-images/image-20260206212003053.png)
 
 #### 2. 创建时技巧
 
-![image-20260206212130963](../../assets/images/image-20260206212130963.png)
+![image-20260206212130963](../AppData/Roaming/Typora/typora-user-images/image-20260206212130963.png)
 
-![image-20260206212743093](../../assets/images/image-20260206212743093.png)
+![image-20260206212743093](../AppData/Roaming/Typora/typora-user-images/image-20260206212743093.png)
 
-![image-20260206213016322](../../assets/images/image-20260206213016322.png)
+![image-20260206213016322](../AppData/Roaming/Typora/typora-user-images/image-20260206213016322.png)
 
-![image-20260206213122967](../../assets/images/image-20260206213122967.png)
+![image-20260206213122967](../AppData/Roaming/Typora/typora-user-images/image-20260206213122967.png)
 
-![image-20260206213739360](../../assets/images/image-20260206213739360.png)
+![image-20260206213739360](../AppData/Roaming/Typora/typora-user-images/image-20260206213739360.png)
 
-![image-20260206213845116](../../assets/images/image-20260206213845116.png)
+![image-20260206213845116](../AppData/Roaming/Typora/typora-user-images/image-20260206213845116.png)
 
-#### 2.2 如何利用有效信息
+#### 3. 如何利用有效信息
 
-![image-20260206220921196](../../assets/images/image-20260206220921196.png)
+![image-20260206220921196](../AppData/Roaming/Typora/typora-user-images/image-20260206220921196.png)
 
 ##### 解决方法
 
-![image-20260206221631285](../../assets/images/image-20260206221631285.png)
+![image-20260206221631285](../AppData/Roaming/Typora/typora-user-images/image-20260206221631285.png)
 
-![image-20260206221725015](../../assets/images/image-20260206221725015.png)
+![image-20260206221725015](../AppData/Roaming/Typora/typora-user-images/image-20260206221725015.png)
 
 ### 2.2 完整系统
 
-![image-20260206221823134](../../assets/images/image-20260206221823134.png)
+![image-20260206221823134](../AppData/Roaming/Typora/typora-user-images/image-20260206221823134.png)
 
-![image-20260206222014011](../../assets/images/image-20260206222014011.png)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+![image-20260206222014011](../AppData/Roaming/Typora/typora-user-images/image-20260206222014011.png)
 
 
 # 科研感悟
@@ -2125,14 +1791,3 @@ text
 **这是clip模型之前的工作**
 
 20 多年前，Mori 等人 (1999) 探索了通过训练一个模型来预测与图像配对的文本文档中的名词和形容词，从而改进基于内容的图像检索。Quattoni 等人 (2007) 证明了通过在学习用于预测与图像相关的标题中单词的分类器权重空间中进行流形学习，可以学习到数据效率更高的图像表示。
-
-
-
-
-
-
-
-
-
-
-
