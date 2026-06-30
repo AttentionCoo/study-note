@@ -6,23 +6,22 @@
 
 | 序号 | 章节 | 核心内容 |
 |------|------|----------|
-| 一 | [基础](#基础) | PyTorch基础、深度学习理解 |
-| 二 | [大模型](#大模型) | 大模型流程、Agent、提示工程、LangChain、向量搜索 |
-| 三 | [RAG](#rag) | 检索器、增强方法、评估基准、操作细节 |
-| 四 | [项目](#项目) | CRAG项目实战 |
-| 五 | [深度学习相关库](#深度学习相关库) | pandas、ChromaDB、jieba、Embedding模型 |
-| 六 | [医学](#医学) | 医学RAG、知识图谱 |
-| 七 | [算法](#算法) | 多模态CLIP、大语言模型Transformer |
-| 八 | [大模型应用](#大模型应用) | 自回归模型、RAG优化 |
-| 九 | [科研感悟](#科研感悟) | 科研方法论 |
+| 一 | [基础](#一基础) | PyTorch基础、深度学习理解 |
+| 二 | [大模型](#二大模型) | 大模型流程、Agent、提示工程、LangChain、向量搜索 |
+| 三 | [项目](#三项目) | CRAG项目实战 |
+| 四 | [深度学习相关库](#四深度学习相关库) | pandas、ChromaDB、jieba、Embedding模型 |
+| 五 | [医学](#五医学) | 医学RAG、知识图谱 |
+| 六 | [算法](#六算法) | 多模态CLIP、大语言模型Transformer |
+| 七 | [大模型应用](#七大模型应用) | 自回归模型、RAG优化 |
+| 八 | [科研感悟](#八科研感悟) | 科研方法论 |
 
 ---
 
-# 基础
+# 一、基础
 
-## 1. pytorch基础
+## 1.1 pytorch基础
 
-### 1.1隐藏层用Sequential的定义方式（更简单）
+### 1.1.1 隐藏层用Sequential的定义方式（更简单）
 
 ![image-20250119140506560](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250119140506560.png)
 
@@ -31,15 +30,15 @@
 ![image-20250119151647640](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250119151647640.png)
 
 
-### 1.2两个向量的点积可以被看作衡量他们对齐程度的方法
+### 1.1.2 两个向量的点积可以被看作衡量他们对齐程度的方法
 
 ![image-20250209135000556](../AppData/Roaming/Typora/typora-user-images/image-20250209135000556.png)
 
 高维向量的方向对应了语义
 
-### 1.3Transformer的目标是将这些向量不仅仅编码单个词，还要融合上下文语意
+### 1.1.3 Transformer的目标是将这些向量不仅仅编码单个词，还要融合上下文语意
 
-### 1.4logits分数
+### 1.1.4 logits分数
 
 在深度学习中，logits 分数是指模型输出层的原始未经处理的分数或得分。这个概念主要用于神经网络模型，特别是那些用于分类任务的模型。Logits 代表了模型对每个类别的线性输出，它们是未经过任何激活函数处理的预测值
 
@@ -56,7 +55,7 @@
 。这种分布随后可能会通过采样方法（如 top-k 采样或 nucleus sampling）来选择下一个词，从而继续文本的生成过程。
 
 
-### 1.5对矩阵点积的更好理解
+### 1.1.5 对矩阵点积的更好理解
 
 这是一个非常好的问题！让我们通过分解矩阵运算的维度来详细理解这个梯度计算过程。首先明确几个关键维度：
 
@@ -150,13 +149,13 @@ delta_w = [
 3. 严格对应逻辑回归的梯度公式：∇w = X^T(Sigmoid(Xw + b) - y)/N
 
 
-### 1.6item()方法
+### 1.1.6 item()方法
 
 在 PyTorch 中，`loss.item()` 的作用是从包含**单个标量值**的张量（Tensor）中提取其数值，并将其转换为 Python 的**基本数据类型**（如 `float`）。以下是详细解释和使用场景：
 
 ------
 
-#### **1. 核心作用**
+#### (1.1.6.1) **1. 核心作用**
 
 - **提取标量值**：
   当损失函数（如 `nn.CrossEntropyLoss()`）返回一个张量时，该张量可能包含梯度信息（`requires_grad=True`）。
@@ -164,7 +163,7 @@ delta_w = [
 - **转换为 Python 类型**：
   返回的是一个 Python 数值（如 `float`），而非 PyTorch 张量，方便直接使用（例如打印、记录日志或参与数值计算）。
 
-### 1.7 参数初始化方法
+### 1.1.7 参数初始化方法
 
 ![image-20250121172613055](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250121172613055.png)
 
@@ -177,27 +176,27 @@ delta_w = [
 ![image-20250121173141823](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250121173141823.png)
 
 
-### 1.8 LayerNorm函数
+### 1.1.8 LayerNorm函数
 
 ![111045dd197522f5409e935ca842c652_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\111045dd197522f5409e935ca842c652_720.jpg)
 
-### 1.9 Embedding参数
+### 1.1.9 Embedding参数
 
 ![1c48d54f13c3f1d54dbad08e6d882b6d_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\1c48d54f13c3f1d54dbad08e6d882b6d_720.jpg)
 
-## 2. 深度学习的理解
+## 1.2 深度学习的理解
 
-### 2.1 深度学习与机器学习
+### 1.2.1 深度学习与机器学习
 
 > 机器学习要自己提取特征，深度学习它自己用特征提取器提取
 
-# 大模型
+# 二、大模型
 
-## 1. 基础
+## 2.1 基础
 
 大模型最擅长的是检索，各种框架其实是把他的检索内容整理一下。它的本身能力不够，只是看起来很光鲜。
 
-### 大模型流程
+### 2.1.1 大模型流程
 
 ![image-20250131194035347](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131194035347.png)
 
@@ -209,7 +208,7 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 
 ![image-20250131195807062](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131195807062.png)
 
-### Agent
+### 2.1.2 Agent
 
 ![image-20250131201748788](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131201748788.png)
 
@@ -223,13 +222,13 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 
 ![image-20250131213410331](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131213410331.png)
 
-### Agent 相当于代理人，大脑还是 LLM
+### 2.1.3 Agent 相当于代理人，大脑还是 LLM
 
 ![image-20250202150316304](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250202150316304.png)
 
 ![image-20250202152409381](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250202152409381.png)
 
-### self ask 不是通用框架，而是一些加上自问自答更好的模型需要
+### 2.1.4 self ask 不是通用框架，而是一些加上自问自答更好的模型需要
 
 如下是self ask
 
@@ -242,7 +241,7 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 上述reflection进行反思（如果不反思，会导致逐渐偏离原问题）。
 
 
-### 提示的重要性
+### 2.1.5 提示的重要性
 
 ![image-20250204225440045](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204225440045.png)
 
@@ -251,11 +250,11 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 
 ![image-20250204230855559](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204230855559.png)
 
-### 少量样本不会改变模型本身，但是fine-tuning会改变本身
+### 2.1.6 少量样本不会改变模型本身，但是fine-tuning会改变本身
 
 ![image-20250204231302023](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204231302023.png)
 
-### 各种器
+### 2.1.7 各种器
 
 ![image-20250204231629321](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204231629321.png)
 
@@ -274,7 +273,7 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 ![image-20250205143511524](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205143511524.png)
 
 
-### 提示词
+### 2.1.8 提示词
 
 提示词起到对大模型进行清洗和筛选的作用。
 
@@ -324,23 +323,23 @@ print(filled_prompt)
 ```
 
 
-### AI知识库类应用所产生的工作流
+### 2.1.9 AI知识库类应用所产生的工作流
 
 ![image-20250207145326563](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250207145326563.png)
 
 ![image-20250207150347171](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250207150347171.png)
 
 
-## Langchain
+## 2.2 Langchain
 
-### 链结构
+### 2.2.1 链结构
 
 ![image-20250205144509184](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205144509184.png)
 
 多链结构，代码决定选择哪条链去解决问题最好？
 
 
-### Langchain提示词模板
+### 2.2.2 Langchain提示词模板
 
 
 ![image-20250204225702840](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204225702840.png)
@@ -350,20 +349,20 @@ print(filled_prompt)
 ![image-20250204230630974](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204230630974.png)
 
 
-### 历史记录模块
+### 2.2.3 历史记录模块
 
 ![image-20250209191745071](../AppData/Roaming/Typora/typora-user-images/image-20250209191745071.png)
 
 说白了：就是把之前的聊天记录一并发给它
 
 
-### Agent非常重要
+### 2.2.4 Agent非常重要
 
 ![image-20250209192531641](../AppData/Roaming/Typora/typora-user-images/image-20250209192531641.png)
 
 react:这里是reasoning and act
 
-#### **1. 基本定义与核心组件**
+#### (2.2.4.1) **1. 基本定义与核心组件**
 
 RouterChain由两部分构成：
 - **路由链（Router Chain）**：负责分析用户输入并选择目标子链，支持两种主要类型：
@@ -375,7 +374,7 @@ RouterChain由两部分构成：
 
 ---
 
-#### **2. 工作原理**
+#### (2.2.4.2) **2. 工作原理**
 
 1. **输入解析**：用户输入被传递给RouterChain。
 2. **路由决策**：
@@ -384,26 +383,26 @@ RouterChain由两部分构成：
 3. **执行子链**：MultiPromptChain将输入传递给选中的子链，生成最终响应。
 4. **默认处理**：若无匹配子链，则调用默认链（如通用对话链）处理。
 
-### 注意RAG检索时和文本嵌入向量时的嵌入模型一定一样
+### 2.2.5 注意RAG检索时和文本嵌入向量时的嵌入模型一定一样
 
 不然会因为两者维度不同而犯错
 
-### 用Chroma创建向量库如果用了client
+### 2.2.6 用Chroma创建向量库如果用了client
 
 那么检索的模型也要包含client
 
 ![image-20250617151606284](../AppData/Roaming/Typora/typora-user-images/image-20250617151606284.png)
 
 
-## langchain基于向量的搜索索引
+## 2.3 langchain基于向量的搜索索引
 
-### **什么是基于向量的搜索索引？**
+### 2.3.1 **什么是基于向量的搜索索引？**
 
 基于向量的搜索索引（Vector Search Index）是一种 **利用机器学习和数学方法**，将文本、图片、音频等 **高维数据** 转换成 **向量**（Vector），并存储在一个专门的数据结构中，使得我们可以通过相似性搜索（比如余弦相似度、欧几里得距离）来高效地查找最相关的内容。
 
 ------
 
-#### **为什么需要向量搜索？**
+#### (2.3.1.1) **为什么需要向量搜索？**
 
 传统的文本搜索（比如数据库的 SQL 查询、全文搜索）通常是 **基于关键字匹配** 的，也就是说：
 
@@ -420,7 +419,7 @@ RouterChain由两部分构成：
 
 ------
 
-#### **向量搜索的核心概念**
+#### (2.3.1.2) **向量搜索的核心概念**
 
 1. **向量（Vector）**
    - 计算机不能直接理解文本，所以我们需要用**数值**表示文本。
@@ -445,7 +444,7 @@ RouterChain由两部分构成：
 
 ------
 
-#### **向量搜索的工作流程**
+#### (2.3.1.3) **向量搜索的工作流程**
 
 以你的代码为例，向量搜索的步骤如下：
 
@@ -476,11 +475,11 @@ RouterChain由两部分构成：
    - 返回最相似的文本片段。
 
 
-### 每个文本嵌入向量维度解释
+### 2.3.2 每个文本嵌入向量维度解释
 
 每个文本的嵌入向量维度表示该文本在 **向量空间** 中的 **表示**。每个向量的维度是由嵌入模型决定的，通常越高维度的向量能表达越丰富的语义信息。在 OpenAI 的嵌入模型中，每个文本的嵌入通常是一个固定长度的向量，具体维度取决于模型。
 
-#### 举个例子：
+#### (2.3.2.1) 举个例子：
 
 假设我们有两个文本：
 
@@ -492,18 +491,18 @@ RouterChain由两部分构成：
 - **文本 1 的嵌入向量**：`[0.123, -0.345, 0.567, ..., 0.987]`（共 512 个数值）
 - **文本 2 的嵌入向量**：`[0.321, -0.432, 0.654, ..., -0.123]`（共 512 个数值）
 
-#### 向量维度的作用：
+#### (2.3.2.2) 向量维度的作用：
 
 - 这些嵌入向量的每个数字代表了文本在某一维度上的语义特征。例如，某些维度可能会捕捉到 **天气** 相关的词汇，而其他维度可能会关注 **活动** 或 **运动** 相关的语义。
 - 嵌入向量的每个文本都被表示为一个固定长度的向量（在这个例子中是 512 维），该向量的不同维度会根据模型训练过程中所学到的语言规律来分配相应的语义信息。
 
-#### 维度的作用：
+#### (2.3.2.3) 维度的作用：
 
 - **文本相似度**：通过比较两个文本的嵌入向量，可以计算它们之间的相似度。如果两个文本的嵌入向量在向量空间中较为接近，则说明这两个文本的语义上较为相似。例如，`文本 1` 和 `文本 2` 的嵌入向量可能会有较高的相似度，因为它们讨论的是相似的主题：天气和适合外出活动。
 - **文本聚类**：通过将多个文本嵌入为向量并进行聚类，可以将相似主题的文本分为一类，从而实现更高效的文本分类或信息检索。
 
 
-### search搜索匹配向量
+### 2.3.3 search搜索匹配向量
 
 因为 Faiss 要求查询输入是 `(num_queries, dimension)` 形状的数组，所以`.reshape((1, embed_dim))` 把向量转换为 **二维格式**，
 
@@ -519,9 +518,9 @@ data, idx = index_innerproduct.search(query_embed[0].reshape((1, embed_dim)), to
 - `idx`：形状是 `(1, topk)`，包含 **最相似文本的索引（整数）**，这些索引可以用来访问 `texts` 中的原始文本
 
 
-### 索引的不同
+### 2.3.4 索引的不同
 
-### **1. Faiss 索引（IndexFlatL2 / IndexFlatIP）**
+### 2.3.5 **1. Faiss 索引（IndexFlatL2 / IndexFlatIP）**
 
 **在 Faiss 中，"索引"（Index）指的是整个向量数据库**，它的作用是存储和查询向量。
 
@@ -542,7 +541,7 @@ index_innerproduct.add(np_embeddings)
 
 ------
 
-### **2. `idx` 里的索引（最相似文本的索引）**
+### 2.3.6 **2. `idx` 里的索引（最相似文本的索引）**
 
 ```python
 data, idx = index_innerproduct.search(query_embed[0].reshape((1, embed_dim)), topk)
@@ -553,13 +552,13 @@ data, idx = index_innerproduct.search(query_embed[0].reshape((1, embed_dim)), to
 - 这些编号 **对应 `texts` 列表中的文本索引**
 
 
-## RAG
+## 2.4 RAG
 
-### 过程
+### 2.4.1 过程
 
 RAG过程展开如 下：（i）检索器最初接收输入查询并搜索相关信 息； (ii) 然后，通过特定的增强方法将原始查询和检 索结果输入生成器； (iii)最后，生成器产生期望的结 果。
 
-#### 检索器
+#### (2.4.1.1) 检索器
 
 密集检索器和稀疏检索器是信息检索领域中两种常见的技术，它们在原理、特点和应用场景上存在显著差异：
 
@@ -624,7 +623,7 @@ RAG过程展开如 下：（i）检索器最初接收输入查询并搜索相关
 
 在实际应用中，两者也可以结合使用，例如先用密集检索快速缩小搜索范围，再用稀疏检索细化结果。
 
-#### 可以做文章的地方
+#### (2.4.1.2) 可以做文章的地方
 
 搜索方式
 
@@ -651,15 +650,15 @@ rag处理代码
 来 RAG 研究和应用的几个 潜在方向。1）增强方法的新颖设计：现有研究已 经探索了检索器和生成器之间的各种交互模式。然 而，由于这两个组件的目标不同，实际的增强过程 对最终的生成结果有重大影响。对更先进的增强基 础的研究有望充分释放 RAG 的潜力。2）灵活的 RAG 管道：RAG 系统正在逐步采用灵活的管道， 例如递归、自适应和迭代 RAG。除了对每个组件进 行适当的调整和精心设计之外，检索源、检索器、 生成器和 RAG 子系统的独特组合有望处理复杂的 任务并提高整体性能。
 
 
-### 操作细节
+### 2.4.2 操作细节
 
 
-#### 问题类型
+#### (2.4.2.1) 问题类型
 
 ![image-20250219170647636](../AppData/Roaming/Typora/typora-user-images/image-20250219170647636.png)
 
 
-#### 脚本执行
+#### (2.4.2.2) 脚本执行
 
 
 这是脚本
@@ -698,7 +697,7 @@ rag处理代码
 
      也是可以的。
 
-### 为什么需要加入正确和错误知识一起训练
+### 2.4.3 为什么需要加入正确和错误知识一起训练
 
 
 **正确知识和错误知识的结合**有助于：
@@ -711,11 +710,11 @@ rag处理代码
 这类数据对于**提升AI在真实场景中的表现**非常重要，特别是**避免错误传播**。
 
 
-### 相似性做文章的地方
+### 2.4.4 相似性做文章的地方
 
 ![image-20250421205735441](../AppData/Roaming/Typora/typora-user-images/image-20250421205735441.png)
 
-### 几个检索器特点
+### 2.4.5 几个检索器特点
 
  🔚 总结对比
 
@@ -735,11 +734,11 @@ rag处理代码
 - 🧠 追求语义匹配精度，推荐 **BGE**（多语言）或 **M3E**（中文）
 
 
-# 项目
+# 三、项目
 
-## 1.CRAG
+## 3.1 CRAG
 
-### 1.解释
+### 3.1.1 1.解释
 
 ![image-20250314225733300](../AppData/Roaming/Typora/typora-user-images/image-20250314225733300.png)
 
@@ -748,7 +747,7 @@ rag处理代码
 
 ![image-20250314225558492](../AppData/Roaming/Typora/typora-user-images/image-20250314225558492.png)
 
-### 2. tokenizer
+### 3.1.2 2. tokenizer
 
 ```python
 train_data = tokenizer(
@@ -885,9 +884,9 @@ tokenizer.save_pretrained(args.save_path + "/ep{}".format(i))
 6. 每个 `epoch` 结束后，保存模型和分词器
 
 
-### 3. 计算余弦
+### 3.1.3 3. 计算余弦
 
-#### 归一化张量
+#### (3.1.3.1) 归一化张量
 
 ```python
 normalized_tensor_1 = tensor_1 / tensor_1.norm(dim=-1, keepdim=True)
@@ -901,17 +900,17 @@ normalized_tensor_2 = tensor_2 / tensor_2.norm(dim=-1, keepdim=True)
 - 将每个张量除以它的 L2 范数，使得每个向量的长度变为 1（单位向量）。
 
 
-### 4.jsonlines
+### 3.1.4 4.jsonlines
 
 1. **处理大数据集**：适合处理非常大的数据集，因为可以逐行读取，而不需要一次性加载整个文件。
 2. **流式处理**：可以用于流式数据处理，例如从网络流中逐行读取 JSON 数据。
 
 
-# 深度学习相关库
+# 四、深度学习相关库
 
-## 1.pandas
+## 4.1 pandas
 
-### 与时间相关
+### 4.1.1 与时间相关
 
 **示例代码解析：**
 
@@ -930,7 +929,7 @@ train = pd.read_csv(DATA_PATH + 'train.csv', parse_dates=['date'])
    - 计算时间差：`df['date'].diff()`
    - 重采样时间序列：`df.resample('D', on='date').sum()`
 
-### pandas拼接用法
+### 4.1.2 pandas拼接用法
 
 **1. 合并油价数据**
 
@@ -958,7 +957,7 @@ full_data = pd.merge(full_data, national_holidays, on='date', how='left')
 - **提取必要列并重命名**：`national_holidays[['date', 'type']]` 只保留日期和假日类型列，并将 `type` 重命名为 `holiday_type`，使列名更明确。
 - **左连接合并**：将全国性假日信息按日期合并到 `full_data` 中，非节假日的日期对应的 `holiday_type` 为 `NaN`。
 
-### pandas进行滞后操作
+### 4.1.3 pandas进行滞后操作
 
 ```
 def create_lag_features(df, lags=[1, 7, 14, 28]):
@@ -981,13 +980,13 @@ def create_lag_features(df, lags=[1, 7, 14, 28]):
    - 为每个 `lag` 生成新列，列名格式为 `sales_lag_{lag}`（如 `sales_lag_7`）。
    - 返回更新后的 DataFrame。
 
-## 2. ChromaDB
+## 4.2 ChromaDB
 
 下面把 Chroma 常用且“必须会”的东西按主题、并配上短代码示例、常见坑与最佳实践列出来。内容基于官方文档 + 社区实践，关键事实我在每部分给出来源链接（便于查阅）。如果你想要我把下面的示例打包成一个可运行的 starter script，我可以直接给你完整脚本。
 
 ------
 
-### 核心概念速览（先记住这些）
+### 4.2.1 核心概念速览（先记住这些）
 
 - **Collection**：相当于一张表，保存向量（embedding）、document（通常是文本 chunk）和 metadata。[Chroma Docs](https://docs.trychroma.com/docs/querying-collections/query-and-get?utm_source=chatgpt.com)
 - **Client 类型**：可选内存（Ephemeral/Client）、本地持久（PersistentClient）或通过 HTTP/Cloud（HttpClient / CloudClient）连接远端/Chroma Cloud。持久化目录通常是 `./chroma` 或你指定的 `path`。[Chroma Docs+1](https://docs.trychroma.com/docs/run-chroma/persistent-client?utm_source=chatgpt.com)
@@ -995,7 +994,7 @@ def create_lag_features(df, lags=[1, 7, 14, 28]):
 
 ------
 
-### 1) 安装 & 初始化（Python）
+### 4.2.2 1) 安装 & 初始化（Python）
 
 ```
 pip install chromadb
@@ -1018,7 +1017,7 @@ collection = client.get_or_create_collection(
 
 ------
 
-### 2) Embedding（嵌入）的常见用法（两条原则非常重要）
+### 4.2.3 2) Embedding（嵌入）的常见用法（两条原则非常重要）
 
 1. **维度一致**：一个 collection 的 embedding 维度一旦第一次写入就被“锁定”，后续写入或查询必须使用相同维度的向量（否则会报错/行为异常）。这是最常见的坑之一。[cookbook.chromadb.dev](https://cookbook.chromadb.dev/faq/?utm_source=chatgpt.com)
 2. **归一化**：默认距离度量是 `l2`（欧氏），如果你用的 embedding 未归一化，距离会非常大，影响结果。对 `L2` 或 `IP`（内积）敏感的场景，**建议先对向量做 normalize（unit vector）** 或显式设定 `hnsw:space` 为 `cosine`。[cookbook.chromadb.dev](https://cookbook.chromadb.dev/faq/?utm_source=chatgpt.com)[realpython.com](https://realpython.com/chromadb-vector-database/?utm_source=chatgpt.com)
@@ -1035,7 +1034,7 @@ collection = client.get_or_create_collection(name="kb", embedding_function=ef)
 
 ------
 
-### 3) 写入（add / upsert / update / delete）
+### 4.2.4 3) 写入（add / upsert / update / delete）
 
 - `collection.add(...)`：用于新增（可能会触发 DuplicateIDError，如果 ids 重复需处理）。
 - `collection.upsert(...)`：**推荐用于可重复执行的写入流程**，会更新已存在 id，若不存在则创建（id 存在则更新）。这是实现幂等写入的常用方法。[Chroma Docs+1](https://docs.trychroma.com/docs/collections/update-data?utm_source=chatgpt.com)
@@ -1062,7 +1061,7 @@ collection.upsert(
 
 ------
 
-### 4) 查询（query / get / peek）与过滤
+### 4.2.5 4) 查询（query / get / peek）与过滤
 
 - `collection.query(...)`：相似度检索（可传 `query_texts` 或 `query_embeddings`），支持 `n_results`、`where`（metadata 过滤）等参数。
 - `collection.get(ids=[...])`：按 id 精确获取记录（非相似检索）。
@@ -1085,7 +1084,7 @@ res = collection.query(query_texts=["xxx"], n_results=5, where={"source":"pdf"})
 
 ------
 
-### 5) 高级搜索：MMR / hybrid / re-ranking（与 LangChain 的常见组合）
+### 4.2.6 5) 高级搜索：MMR / hybrid / re-ranking（与 LangChain 的常见组合）
 
 - 如果你用 LangChain 的 `Chroma` 包装器，可以把 vectorstore 当作 retriever，支持 `search_type="mmr"`（最大边际相关性）以及 `fetch_k`、`lambda_mult` 等参数来平衡相关性与多样性（MMR）。这在 RAG 场景很常见。[LangChain+1](https://python.langchain.com/docs/integrations/vectorstores/chroma/?utm_source=chatgpt.com)
 
@@ -1101,14 +1100,14 @@ docs = retriever.get_relevant_documents("问题文本")
 
 ------
 
-### 6) 索引与性能调优（HNSW 参数 & 内存）
+### 4.2.7 6) 索引与性能调优（HNSW 参数 & 内存）
 
 - Chroma 使用 HNSW（fork）做索引。HNSW 的索引需要驻留在内存中以获得高性能，因此即便使用磁盘持久化，查询时仍有内存要求（索引大小与向量数量、参数有关）。如果你要处理非常大规模（百万级以上）向量，需要评估内存和分片策略，或考虑更面向分布式/大规模的向量库（如 Milvus 等）。[Chroma Docs](https://docs.trychroma.com/guides/deploy/performance?utm_source=chatgpt.com)[Zilliz](https://zilliz.com/blog/milvus-vs-chroma?utm_source=chatgpt.com)
 - 可以在创建 collection 时通过 metadata 设置 HNSW 参数，例如 `{"hnsw:space":"cosine", "hnsw:m":16, "hnsw:ef_construction":200}`（不同版本 API 可能细节略有不同，修改后通常需重建索引或 clone collection）。[cookbook.chromadb.dev](https://cookbook.chromadb.dev/core/configuration/?utm_source=chatgpt.com)
 
 ------
 
-### 7) 持久化、备份与迁移
+### 4.2.8 7) 持久化、备份与迁移
 
 - **PersistentClient(path=...)** 会把数据写到你指定目录（默认 `./chroma`），重启时会自动加载。适合单机持久化。[Chroma Docs](https://docs.trychroma.com/docs/run-chroma/persistent-client?utm_source=chatgpt.com)
 - 在 notebook 中写入时，有些版本需要调用 `client.persist()` 来强制把内存写到磁盘（不同版本 API 有差异；在某些版本中 persist 方法被调整/移除，注意你的 chroma 版本）。一般脚本里，client 被销毁时会自动 flush。建议：写完后检查 count / peek，并根据你版本是否支持显式 persist 决定是否调用。[Stack Overflow](https://stackoverflow.com/questions/77231763/cannot-load-persisted-db-using-chroma-langchain?utm_source=chatgpt.com)[GitHub](https://github.com/langchain-ai/langchain/issues/20851?utm_source=chatgpt.com)
@@ -1116,7 +1115,7 @@ docs = retriever.get_relevant_documents("问题文本")
 
 ------
 
-### 8) 常见坑、调试建议与最佳实践（必须记住）
+### 4.2.9 8) 常见坑、调试建议与最佳实践（必须记住）
 
 1. **embedding 维度不一致** → 直接报错或查询结果异常。上传 embeddings 前统一模型/维度。[cookbook.chromadb.dev](https://cookbook.chromadb.dev/faq/?utm_source=chatgpt.com)
 2. **未归一化 embedding 导致大距离** → 归一化或设 `hnsw:space="cosine"`。[cookbook.chromadb.dev](https://cookbook.chromadb.dev/faq/?utm_source=chatgpt.com)
@@ -1126,7 +1125,7 @@ docs = retriever.get_relevant_documents("问题文本")
 
 ------
 
-### 9) 常用 API 速查（一行说明 + 示例）
+### 4.2.10 9) 常用 API 速查（一行说明 + 示例）
 
 - 创建 client：`client = chromadb.Client()` / `PersistentClient(path="./chroma")`。[Chroma Docs](https://docs.trychroma.com/docs/run-chroma/persistent-client?utm_source=chatgpt.com)
 - 创建/获取 collection：`collection = client.get_or_create_collection(name="kb", embedding_function=ef)`。[Chroma Docs](https://docs.trychroma.com/docs/collections/manage-collections?utm_source=chatgpt.com)
@@ -1138,14 +1137,14 @@ docs = retriever.get_relevant_documents("问题文本")
 
 ------
 
-### 10) 与其他工具/框架整合（很常用）
+### 4.2.11 10) 与其他工具/框架整合（很常用）
 
 - **LangChain**：官方有 Chroma 的整合（能直接把 Chroma 当成 vectorstore / retriever 用），并支持 MMR 等策略。对 RAG + QA 很便利。[LangChain+1](https://python.langchain.com/docs/integrations/vectorstores/chroma/?utm_source=chatgpt.com)
 - **LlamaIndex / Haystack / other**：都有 Chroma adapter，可以把 Chroma 作为底层向量存储。[LlamaIndex 文档](https://docs.llamaindex.ai/en/stable/examples/vector_stores/ChromaIndexDemo/?utm_source=chatgpt.com)[Haystack Documentation](https://docs.haystack.deepset.ai/docs/chromadocumentstore?utm_source=chatgpt.com)
 
 ------
 
-### 11) 推荐的简单工程化流程（POC → 生产）
+### 4.2.12 11) 推荐的简单工程化流程（POC → 生产）
 
 1. POC：在本地 `Client()` 或 `PersistentClient(path="./tmp")` 做小规模测试，使用现成 embedding（sentence-transformers 或 OpenAI）。[realpython.com](https://realpython.com/chromadb-vector-database/?utm_source=chatgpt.com)
 2. 设计 chunk strategy：把长文按合理长度切片并带上来源 metadata（file_hash、page_no 等）。[Medium](https://blog.amikos.tech/chroma-basics-document-primitive-d5a0c97cc813?utm_source=chatgpt.com)
@@ -1155,7 +1154,7 @@ docs = retriever.get_relevant_documents("问题文本")
 
 ------
 
-### 参考（节选——我在正文中引用的权威资源）
+### 4.2.13 参考（节选——我在正文中引用的权威资源）
 
 - Chroma 官方入门 / Query 与 Collection 文档（query/get/metadata filtering）。[Chroma Docs+1](https://docs.trychroma.com/docs/querying-collections/query-and-get?utm_source=chatgpt.com)
 - Chroma 性能说明（HNSW 索引需在内存）。[Chroma Docs](https://docs.trychroma.com/guides/deploy/performance?utm_source=chatgpt.com)
@@ -1165,7 +1164,7 @@ docs = retriever.get_relevant_documents("问题文本")
 
 ------
 
-### 额外：给你的一份最小化 Python 模板（可直接复制运行）
+### 4.2.14 额外：给你的一份最小化 Python 模板（可直接复制运行）
 
 （如果你愿意，我可以把下面模板完整展开成 `.py` 文件并包含虚拟 embedding 的 demo 数据）
 
@@ -1202,7 +1201,7 @@ print("count", collection.count())
 print(collection.peek(3))
 ```
 
-### 1. ChromaDB 与 LangChain 的结合方式
+### 4.2.15 1. ChromaDB 与 LangChain 的结合方式
 
 LangChain 已经内置了对 **Chroma** 的支持，可以直接把它当作 `VectorStore` 使用。
  这意味着你可以：
@@ -1250,9 +1249,9 @@ retriever = vectorstore.as_retriever(
 
 ------
 
-### 2. 参数的含义
+### 4.2.16 2. 参数的含义
 
-#### Chroma 核心参数
+#### (4.2.16.1) Chroma 核心参数
 
 - **collection_name**
   - 向量库的集合名（相当于一张表），同一个集合内维度必须一致。
@@ -1269,7 +1268,7 @@ retriever = vectorstore.as_retriever(
 
 ------
 
-#### Query / Search 参数
+#### (4.2.16.2) Query / Search 参数
 
 - **query_texts** / **query_embeddings**
 
@@ -1290,7 +1289,7 @@ retriever = vectorstore.as_retriever(
 
 ------
 
-#### Retriever 参数（LangChain 封装）
+#### (4.2.16.3) Retriever 参数（LangChain 封装）
 
 - **search_type**
   - `"similarity"`：按相似度返回 top-k
@@ -1302,7 +1301,7 @@ retriever = vectorstore.as_retriever(
 
 ------
 
-### 3. metadata 是什么？
+### 4.2.17 3. metadata 是什么？
 
 `metadata` 就是每个向量绑定的 **额外信息（键值对字典）**。
  它不会进入 embedding，但能帮助你做 **过滤 / 溯源 / 上下文追踪**。
@@ -1354,7 +1353,7 @@ res = collection.query(
 - **metadata** 是“上下文标签”，不影响向量计算，但能做过滤和结果解释，是 RAG 系统中非常重要的“溯源信息”。
 
 
-## 3. **jieba**
+## 4.3 **jieba**
 
 `jieba` 是一个中文分词库，常用于中文文本的切分和处理。它通过将中文句子切分成一个个有意义的词语，帮助计算机理解中文文本的结构。在自然语言处理（NLP）中，分词是中文处理中的基础步骤。
 
@@ -1370,7 +1369,7 @@ res = collection.query(
   - **全模式**：把句子中所有可能的词语都扫描出来，速度非常快，但不能解决歧义。
   - **搜索引擎模式**：适用于搜索引擎构建，粒度比精确模式更细。
 
-### 2. **cut_for_search**
+### 4.3.1 2. **cut_for_search**
 
 `cut_for_search` 是 `jieba` 中的一个分词方法，适用于将文本切分为搜索引擎友好的细粒度词汇。它会将句子分割成比精确模式更细的粒度，以适应搜索引擎中关键词匹配的需求。
 
@@ -1391,20 +1390,20 @@ res = collection.query(
 
   - 这种方式切分出来的词汇比较细，例如“清华大学”被拆成了“清华”和“大学”，这是因为搜索引擎会用到这些细粒度的关键词来提高匹配的准确性。
 
-## 4. Embedding模型选择
+## 4.4 Embedding模型选择
 
 ![image-20250731185516271](../AppData/Roaming/Typora/typora-user-images/image-20250731185516271.png)
 
 
-# 医学
+# 五、医学
 
-## RAG
+## 5.1 RAG
 
-### 一些文献
+### 5.1.1 一些文献
 
 ![image-20250508172717363](../AppData/Roaming/Typora/typora-user-images/image-20250508172717363.png)
 
-### 知识图谱
+### 5.1.2 知识图谱
 
 ![image-20250603163838384](../AppData/Roaming/Typora/typora-user-images/image-20250603163838384.png)
 
@@ -1420,20 +1419,20 @@ res = collection.query(
 
 ![image-20250525002102219](../AppData/Roaming/Typora/typora-user-images/image-20250525002102219.png)
 
-### 论文
+### 5.1.3 论文
 
 ![image-20250525205105062](../AppData/Roaming/Typora/typora-user-images/image-20250525205105062.png)
 
 
-# 算法
+# 六、算法
 
-## 多模态
+## 6.1 多模态
 
-### clip
+### 6.1.1 clip
 
-#### 简介
+#### (6.1.1.1) 简介
 
-##### 1. 预训练后：“文本-图像配对”思维的形成
+##### (6.1.1.1.1) 预训练后：“文本-图像配对”思维的形成
 
 在预训练阶段，模型看了**4亿个（图像，文本描述）对**。
 *   **它学到的东西**：并不是简单地认识“狗”或“汽车”这个类别标签，而是学习到了 **“某一段文字描述（如‘一只在草坪上奔跑的狗’）在视觉上应该对应什么样的图像特征”** ，反之亦然。
@@ -1441,7 +1440,7 @@ res = collection.query(
 
 ---
 
-##### 2. “自然语言被用来引用学习到的视觉概念”
+##### (6.1.1.1.2) “自然语言被用来引用学习到的视觉概念”
 
 这是指在**做下游任务时（比如图像分类）**，我们如何“唤醒”模型在预训练中学到的知识。
 
@@ -1462,7 +1461,7 @@ res = collection.query(
 
 ---
 
-##### 3. “或描述新的概念”——零样本能力的核心
+##### (6.1.1.1.3) “或描述新的概念”——零样本能力的核心
 
 这才是CLIP最强大的地方。**下游任务中的类别，完全可以不在预训练数据中明确出现过！**
 
@@ -1484,7 +1483,7 @@ res = collection.query(
 
 ---
 
-##### 用一个完整比喻来总结
+##### (6.1.1.1.4) 用一个完整比喻来总结
 
 想象CLIP在预训练阶段是一个**博览群书（4亿对图文）的通才**，它不背死答案，而是建立了强大的“图文联想”能力。
 
@@ -1497,26 +1496,26 @@ res = collection.query(
 这个通才就能基于它庞大的知识库和强大的联想能力，给出答案。**这就是零样本迁移**——模型迁移的不是某个具体任务的参数，而是迁移了**用语言理解和连接视觉世界的基础能力**。
 
 
-#### **训练流程详解**
+#### (6.1.1.2) **训练流程详解**
 
-##### **第1步：准备海量“图文对”数据**
+##### (6.1.1.2.1) **第1步：准备海量“图文对”数据**
 
 - **数据来源**：从互联网上爬取4亿个（图像，文本描述）对。文本就是图片的原始说明、标题或ALT文本。
 - **特点**：数据是“噪声”的——描述不一定精确，但足够丰富和多样。这迫使模型去理解语义，而不是死记硬背。
 
-##### **第2步：构建“批次”并进行编码**
+##### (6.1.1.2.2) **第2步：构建“批次”并进行编码**
 
 1. 随机抽取一个批次的N个图文对，例如 N=1024。
 2. **图像编码**：将N张图片输入**图像编码器**（可以是Vision Transformer或ResNet），得到N个图像特征向量 `[I1, I2, ..., IN]`。
 3. **文本编码**：将对应的N条文本输入**文本编码器**（一个Transformer），得到N个文本特征向量 `[T1, T2, ..., TN]`。
 
-##### **第3步：计算相似度矩阵**
+##### (6.1.1.2.3) **第3步：计算相似度矩阵**
 
 - 计算**所有图像特征**和**所有文本特征**之间的余弦相似度，得到一个 `N x N` 的矩阵。
 - **矩阵对角线**上的元素 `(I1, T1), (I2, T2)...` 是**正样本对**（它们本来就是配对的）。
 - **矩阵非对角线**上的元素都是**负样本对**（比如 `I1` 和 `T2`，图片和文字不匹配）。
 
-##### **第4步：通过对比损失函数进行优化**
+##### (6.1.1.2.4) **第4步：通过对比损失函数进行优化**
 
 这是训练的关键。目标很直观：
 
@@ -1529,17 +1528,17 @@ res = collection.query(
 - **文本→图像分类**：同理，对于每一条文本 `T_i`，把N张图片当作N个“类别”，唯一的正确“类别”是其配对的图片 `I_i`。
 - **总损失**是这两个方向损失的平均。这就是“对称”的含义，确保图文理解是双向对齐的。
 
-##### **第5步：反向传播与迭代**
+##### (6.1.1.2.5) **第5步：反向传播与迭代**
 
 - 计算出的总损失通过反向传播，同时更新**图像编码器**和**文本编码器**的参数。
 - 用新的批次重复这个过程，在数亿的数据上迭代数轮。
 
 
-## 大语言模型
+## 6.2 大语言模型
 
-### 1. Transformer基础
+### 6.2.1 1. Transformer基础
 
-#### 1.0 深层理解
+#### (6.2.1.1) 0 深层理解
 
 我们从头梳理一下大模型利用注意力机制生成文本的完整流程。这个过程可以分为三个层次：注意力机制的计算、注意力输出的含义、以及基于该输出的自回归生成。
 
@@ -1614,7 +1613,7 @@ $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\mathsf{T}}{\sqrt{d_k
 通过这种方式，大模型能够生成连贯、符合上下文的自然语言文本。
 
 
-#### 1.1 原向量要乘以一个矩阵才能得到查询(query)
+#### (6.2.1.2) 1 原向量要乘以一个矩阵才能得到查询(query)
 
 这样才能得到包含一定（注意是一定）上下文信息的向量，实质是将嵌入向量映射到相应的低维空间
 
@@ -1624,7 +1623,7 @@ $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\mathsf{T}}{\sqrt{d_k
 ![image-20250209154740877](../AppData/Roaming/Typora/typora-user-images/image-20250209154740877.png)
 
 
-#### 1.2 每种不同的上下文更新方式，键矩阵和查询矩阵参数都会变，
+#### (6.2.1.3) 2 每种不同的上下文更新方式，键矩阵和查询矩阵参数都会变，
 
 值矩阵也会因嵌入值更新值而改变
 
@@ -1632,31 +1631,31 @@ $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\mathsf{T}}{\sqrt{d_k
 ![image-20250209162531504](../AppData/Roaming/Typora/typora-user-images/image-20250209162531504.png)
 
 
-#### 1.3 n个注意头意味着n个q,k,v矩阵
+#### (6.2.1.4) 3 n个注意头意味着n个q,k,v矩阵
 
-#### 1.4 多头训练
+#### (6.2.1.5) 4 多头训练
 
 多加几个头更精确（就多加几个delta）
 
 ![image-20250209162936158](../AppData/Roaming/Typora/typora-user-images/image-20250209162936158.png)
 
 
-#### 1.5 深层理解
+#### (6.2.1.6) 5 深层理解
 
 ![image-20250209163459471](../AppData/Roaming/Typora/typora-user-images/image-20250209163459471.png)
 
 
-# 大模型应用
+# 七、大模型应用
 
-## 1. 基础
+## 7.1 基础
 
-### 1.1 自回归模型
+### 7.1.1 自回归模型
 
-#### 解释
+#### (7.1.1.1) 解释
 
 在训练时，模型在预测某个位置的词时，**只能看到这个词之前的所有信息（上文）**，而不能“偷看”未来的词。这个特性就叫 **“自回归”**。
 
-#### 操作
+#### (7.1.1.2) 操作
 
 GPT是：
 
@@ -1666,7 +1665,7 @@ GPT是：
 4. **把提示词+前两个token一起输入**，预测第三个新token
 5. 如此循环，直到生成结束
 
-##### **关键技术细节**
+##### (7.1.1.2.1) **关键技术细节**
 
 ​      1.**KV缓存（Key-Value Cache）**：实际实现中，为提升效率，不会每次都重新计算整个序列。
 
@@ -1687,18 +1686,18 @@ GPT是：
 - 如果没有整个历史，模型就像失忆一样，无法保持一致性。
 
 
-#### GPT是自监督模型
+#### (7.1.1.3) GPT是自监督模型
 
-#### 大数据集起作用原理
+#### (7.1.1.4) 大数据集起作用原理
 
 这个看似简单的任务，当数据量（整个互联网）和模型规模（千亿级参数）达到临界点后，会产生质变，即 **“涌现能力”**。
 
 
-### 1.2 传统机器学习模型
+### 7.1.2 传统机器学习模型
 
-#### 1. RNN
+#### (7.1.2.1) RNN
 
-##### **RNN的基本原理：通过“记忆”间接传递信息**
+##### (7.1.2.1.1) **RNN的基本原理：通过“记忆”间接传递信息**
 
 RNN（循环神经网络）的核心思想是：**每个时间步只能看到当前输入和上一个时间步的“记忆”（隐藏状态），通过这个“记忆”链式传递信息。**
 
@@ -1726,7 +1725,7 @@ RNN（循环神经网络）的核心思想是：**每个时间步只能看到当
 **关键**：在t5时刻，RNN只能直接看到**词5**和**h4**。h4是包含了词1-词4信息的“摘要”，但不是原始信息本身。
 
 
-### 1.3 **大模型学习的是组合规律**
+### 7.1.3 **大模型学习的是组合规律**
 
 有限样本中包含了大量可重用的“模块”，模型学会这些模块后可以组合出新的内容。
 
@@ -1745,15 +1744,15 @@ RNN（循环神经网络）的核心思想是：**每个时间步只能看到当
 这叫**组合泛化（compositional generalization）**。
 
 
-## 2. RAG
+## 7.2 RAG
 
-### 2.1 如何提高
+### 7.2.1 如何提高
 
-#### 1. 检索前
+#### (7.2.1.1) 检索前
 
 ![image-20260206212003053](../AppData/Roaming/Typora/typora-user-images/image-20260206212003053.png)
 
-#### 2. 创建时技巧
+#### (7.2.1.2) 创建时技巧
 
 ![image-20260206212130963](../AppData/Roaming/Typora/typora-user-images/image-20260206212130963.png)
 
@@ -1767,26 +1766,26 @@ RNN（循环神经网络）的核心思想是：**每个时间步只能看到当
 
 ![image-20260206213845116](../AppData/Roaming/Typora/typora-user-images/image-20260206213845116.png)
 
-#### 3. 如何利用有效信息
+#### (7.2.1.3) 如何利用有效信息
 
 ![image-20260206220921196](../AppData/Roaming/Typora/typora-user-images/image-20260206220921196.png)
 
-##### 解决方法
+##### (7.2.1.3.1) 解决方法
 
 ![image-20260206221631285](../AppData/Roaming/Typora/typora-user-images/image-20260206221631285.png)
 
 ![image-20260206221725015](../AppData/Roaming/Typora/typora-user-images/image-20260206221725015.png)
 
-### 2.2 完整系统
+### 7.2.2 完整系统
 
 ![image-20260206221823134](../AppData/Roaming/Typora/typora-user-images/image-20260206221823134.png)
 
 ![image-20260206222014011](../AppData/Roaming/Typora/typora-user-images/image-20260206222014011.png)
 
 
-# 科研感悟
+# 八、科研感悟
 
-## 1. 科研是循序渐进的
+## 8.1 科研是循序渐进的
 
 **这是clip模型之前的工作**
 
