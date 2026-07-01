@@ -7,7 +7,7 @@
 | 序号 | 章节 | 核心内容 |
 |------|------|----------|
 | 一 | [基础](#一基础) | PyTorch基础、深度学习理解、机器学习与大数据 |
-| 二 | [大模型](#二大模型) | 大模型流程、Agent、提示工程、LangChain、向量搜索 |
+| 二 | [大模型](#二大模型) | 大模型流程、LLM训练三阶段、NLP分词化、Agent、提示工程、Agent高级推理策略、LangChain、RAG核心流程、向量搜索 |
 | 三 | [项目](#三项目) | CRAG项目实战 |
 | 四 | [深度学习相关库](#四深度学习相关库) | pandas、ChromaDB、jieba、Embedding模型 |
 | 五 | [医学](#五医学) | 医学RAG、知识图谱 |
@@ -28,6 +28,67 @@
 **另一种**方式
 
 ![image-20250119151647640](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250119151647640.png)
+
+#### (1.1.1.1) 神经网络中的 Dropout 实现
+
+Dropout 在训练时以概率 `p` 随机将神经元输出置零，防止过拟合；推理时自动关闭，所有神经元参与计算。
+
+```python
+import torch
+import torch.nn as nn
+
+class SimpleNet(nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim, dropout_prob=0.5):
+        super(SimpleNet, self).__init__()
+        self.layers = nn.Sequential(
+            nn.Linear(input_dim, hidden_dim),
+            nn.ReLU(),
+            nn.Dropout(dropout_prob),
+            nn.Linear(hidden_dim, output_dim)
+        )
+
+    def forward(self, x):
+        return self.layers(x)
+
+model = SimpleNet(input_dim=10, hidden_dim=32, output_dim=1)
+```
+
+> ⚠️ 注意：`nn.Dropout` 在 `model.train()` 时生效，`model.eval()` 时自动关闭。
+
+#### (1.1.1.2) 梯度不平稳性与 Glorot 条件 / Batch Normalization
+
+深层网络中梯度容易消失或爆炸，常用解决方案包括：
+- **Glorot 初始化**（Xavier）：使每层输出的方差与输入方差一致
+- **Batch Normalization**：对每个 mini-batch 做归一化，加速收敛并缓解梯度问题
+- **Dropout**：正则化手段，间接提升训练稳定性
+
+```python
+import numpy as np
+import torch
+import torch.nn as nn
+
+np.random.seed(0)
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+class SimpleNetwork(nn.Module):
+    def __init__(self, layers):
+        super(SimpleNetwork, self).__init__()
+        self.layers = nn.ModuleList()
+        for i in range(len(layers) - 1):
+            self.layers.append(nn.Linear(layers[i], layers[i + 1]))
+            self.layers.append(nn.Sigmoid())
+
+    def forward(self, x):
+        for layer in self.layers:
+            x = layer(x)
+        return x
+
+input_size = 1
+hidden_sizes = [64] * 10
+output_size = 1
+layers = [input_size] + hidden_sizes + [output_size]
+model = SimpleNetwork(layers).to(device)
+```
 
 
 ### 1.1.2 两个向量的点积可以被看作衡量他们对齐程度的方法
@@ -163,26 +224,145 @@ delta_w = [
 - **转换为 Python 类型**：
   返回的是一个 Python 数值（如 `float`），而非 PyTorch 张量，方便直接使用（例如打印、记录日志或参与数值计算）。
 
-### 1.1.7 参数初始化方法
+### 1.1.7 参数初始化方法 & 网络重构方式
 
 ![image-20250121172613055](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250121172613055.png)
 
-现在方法一：
+#### (1.1.7.1) 原始网络定义
+
+逐层手动定义，每层单独声明并在 `forward` 中显式调用：
+
+```python
+class Model0(nn.Module):
+    def __init__(self, in_features=10, out_features=2):
+        super(Model0, self).__init__()
+        self.h1 = nn.Linear(in_features, 100, bias=True)
+        self.h2 = nn.Linear(100, 30, bias=True)
+        self.out = nn.Linear(30, out_features, bias=True)
+
+    def forward(self, x):
+        h1_out = self.h1(x)
+        h1_out_r = torch.relu(h1_out)
+        h2_out = self.h2(h1_out_r)
+        h2_out_r = torch.relu(h2_out)
+        out_out = self.out(h2_out_r)
+        return out_out
+```
+
+#### (1.1.7.2) 方法一：nn.Sequential 重构（简洁，适合顺序网络）
 
 ![image-20250121172827337](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250121172827337.png)
 
-方法二，用列表**（更多灵活性，但是更麻烦）**：
+将层按顺序打包，`forward` 只需一次调用：
+
+```python
+class SequentialModel(nn.Module):
+    def __init__(self, in_features=10, out_features=2):
+        super(SequentialModel, self).__init__()
+        self.model = nn.Sequential(
+            nn.Linear(in_features, 100, bias=True),
+            nn.ReLU(),
+            nn.Linear(100, 30, bias=True),
+            nn.ReLU(),
+            nn.Linear(30, out_features, bias=True)
+        )
+
+    def forward(self, x):
+        return self.model(x)
+```
+
+> ✅ 优点：代码简洁，适合纯顺序的前向传播网络。
+
+#### (1.1.7.3) 方法二：nn.ModuleList 重构（更多灵活性，但更麻烦）
 
 ![image-20250121173141823](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250121173141823.png)
+
+用列表存储层，在 `forward` 中循环调用：
+
+```python
+class ModuleListModel(nn.Module):
+    def __init__(self, in_features=10, out_features=2):
+        super(ModuleListModel, self).__init__()
+        self.layers = nn.ModuleList([
+            nn.Linear(in_features, 100, bias=True),
+            nn.ReLU(),
+            nn.Linear(100, 30, bias=True),
+            nn.ReLU(),
+            nn.Linear(30, out_features, bias=True)
+        ])
+
+    def forward(self, x):
+        for layer in self.layers:
+            x = layer(x)
+        return x
+```
+
+> ✅ 优点：可在循环中动态增减层、条件跳过某些层，灵活性高。
+>
+> ⚠️ 注意：`nn.ModuleList` 不会自动执行前向传播，必须在 `forward` 中手动遍历；而 `nn.Sequential` 会自动按序执行。
+
+#### (1.1.7.4) 三种方式对比
+
+| 方式 | 代码量 | 灵活性 | 适用场景 |
+|------|--------|--------|----------|
+| 手动定义 | 最多 | 最高 | 需要复杂前向逻辑（残差、多分支） |
+| `nn.Sequential` | 最少 | 最低 | 纯顺序网络 |
+| `nn.ModuleList` | 中等 | 较高 | 层数动态变化、循环调用 |
 
 
 ### 1.1.8 LayerNorm函数
 
 ![111045dd197522f5409e935ca842c652_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\111045dd197522f5409e935ca842c652_720.jpg)
 
+#### (1.1.8.1) normalized_shape 参数的含义
+
+`nn.LayerNorm(normalized_shape)` 中的 `normalized_shape` 指定对输入张量的**最后若干维度**进行归一化。
+
+**示例：传入 `[3, 4]`**
+
+```python
+layer_norm = nn.LayerNorm(normalized_shape=[3, 4])
+```
+
+- 表示对输入张量的**最后两个维度**（形状为 3 和 4）进行归一化
+- 假设输入形状为 `(batch_size, ..., 3, 4)`，则对每个样本在最后两个维度上计算均值和方差，然后归一化
+- 归一化的元素个数为 $3 \times 4 = 12$，即对这 12 个元素一起求均值和方差
+
+**与 BatchNorm 的区别**
+
+| 特性 | LayerNorm | BatchNorm |
+|------|-----------|-----------|
+| 归一化维度 | 沿**特征维度**（单个样本内部） | 沿**batch维度**（跨样本） |
+| 对 batch size 依赖 | ❌ 不依赖 | ✅ 依赖，小 batch 效果差 |
+| 典型应用 | Transformer、RNN | CNN |
+| 推理行为 | 与训练一致 | 需要运行时统计均值/方差 |
+
 ### 1.1.9 Embedding参数
 
 ![1c48d54f13c3f1d54dbad08e6d882b6d_720](C:\Users\hp\Documents\Tencent Files\1759751014\nt_qq\nt_data\Pic\2025-01\Thumb\1c48d54f13c3f1d54dbad08e6d882b6d_720.jpg)
+
+#### (1.1.9.1) nn.Embedding() 参数详解
+
+| 参数 | 是否必须 | 说明 |
+|------|----------|------|
+| **num_embeddings** | ✅ 必须 | 嵌入字典的大小，即有多少个不同的索引需要被映射 |
+| **embedding_dim** | ✅ 必须 | 每个嵌入向量的维度，即映射到的连续向量空间的维度 |
+| **padding_idx** | 可选 | 指定索引对应的嵌入向量固定为零向量，不参与训练更新 |
+| **max_norm** | 可选 | 对嵌入向量进行归一化，使其范数不超过该值 |
+| **norm_type** | 可选 | 归一化使用的范数类型，默认为 L2 范数 |
+| **scale_grad_by_freq** | 可选 | 梯度根据索引频率进行缩放 |
+
+**使用示例**
+
+```python
+embedding = nn.Embedding(num_embeddings=1000, embedding_dim=64, padding_idx=0)
+
+input_ids = torch.tensor([1, 5, 20, 100])
+output = embedding(input_ids)
+print(output.shape)
+```
+
+> 💡 `padding_idx` 常用于 NLP 中将 padding token 的嵌入固定为零，避免其参与梯度更新。
 
 ## 1.2 深度学习的理解
 
@@ -309,7 +489,29 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 
 ![image-20250131195807062](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131195807062.png)
 
-### 2.1.2 Agent
+### 2.1.2 LLM 训练三阶段
+
+| 阶段 | 名称 | 类比 | 核心目标 | 局限性 |
+| :--- | :--- | :--- | :--- | :--- |
+| **1** | **预训练 (Pre-training)** | 婴儿→中学生 | 学习语言统计规律、通用知识，形成语言习惯 | 只会"补全句子"，不会领会人类意图（如问"埃菲尔铁塔在哪"，可能答非所问） |
+| **2** | **SFT (监督微调)** | 中学生→大学生 | 学习人类对话语料和专业领域知识，按人类意图回答问题 | 可能输出涉黄、涉政、涉暴或偏见言论，不符合人类偏好 |
+| **3** | **RLHF (基于人类反馈的强化学习)** | 大学生→职场新人 | 通过人类对模型回答打分，模型学习输出分数最高的回答 | — |
+
+### 2.1.3 NLP 基础 —— 分词化（Tokenization）
+
+**定义**：将段落和句子分割成更小的 token 的过程。
+
+**粒度分类**：
+
+| 粒度 | 说明 | 示例 |
+| :--- | :--- | :--- |
+| **词粒度 (Word-Level)** | 适用于英语等西方语言 | `I want to study ACA.` → `['I', 'want', 'to', 'study', 'ACA', '.']` |
+| **字符粒度 (Character-Level)** | 中文最直接的方式，以单个汉字为单位 | `"深度学习"` → `['深', '度', '学', '习']` |
+| **子词粒度 (Subword-Level)** | 拆分为词根、词缀，对新词效果好 | `"unhappiness"` → `['un', 'happi', 'ness']` |
+
+**流程**：文本 → Tokenization → Token列表 → 词表映射 → Token ID列表（供计算机处理）
+
+### 2.1.4 Agent
 
 ![image-20250131201748788](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131201748788.png)
 
@@ -323,13 +525,26 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 
 ![image-20250131213410331](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250131213410331.png)
 
-### 2.1.3 Agent 相当于代理人，大脑还是 LLM
+#### (2.1.4.1) Agent 决策流程（循环）
+
+**感知 (Perception) → 规划 (Planning) → 观察 (Observation) → 行动 (Action)** → 循环直到任务完成
+
+#### (2.1.4.2) Agent 四大核心组件
+
+| 组件 | 说明 | 实现方式 |
+| :--- | :--- | :--- |
+| **规划 (Planning)** | 分解大型任务为子任务（类似思维导图），执行中反思、自我批评，决定继续或终止 | Chain of Thoughts, Subgoal decomposition, Reflection, Self-critics |
+| **记忆 (Memory)** | **短期**：任务执行中的上下文（任务结束清空）；**长期**：外部知识库 | 向量数据库存储与检索 |
+| **工具 (Tools)** | 与物理世界交互的 API | 计算器、搜索工具、代码执行器、日历、数据库查询等 |
+| **执行 (Action)** | 根据规划和记忆实施具体行动 | 调用工具或外部交互 |
+
+### 2.1.5 Agent 相当于代理人，大脑还是 LLM
 
 ![image-20250202150316304](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250202150316304.png)
 
 ![image-20250202152409381](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250202152409381.png)
 
-### 2.1.4 self ask 不是通用框架，而是一些加上自问自答更好的模型需要
+### 2.1.6 self ask 不是通用框架，而是一些加上自问自答更好的模型需要
 
 如下是self ask
 
@@ -341,8 +556,33 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 
 上述reflection进行反思（如果不反思，会导致逐渐偏离原问题）。
 
+### 2.1.7 Agent 高级推理策略
 
-### 2.1.5 提示的重要性
+#### (2.1.7.1) ReAct（推理 + 行动）
+
+- **原理**：交替进行推理（Reasoning）和行动（Acting）
+- **优势**：仅推理会产生幻觉，仅行动会返回海量无效资料；ReAct 基于已有知识，当不足时调用工具（如搜索），迭代得出精准答案
+
+#### (2.1.7.2) 思维树 (Tree-of-Thoughts, ToT)
+
+- **原理**：对思维链 (CoT) 的扩展，在每一步推理出多个分支，拓扑展开成树
+- **搜索算法**：使用 BFS（广度优先）或 DFS（深度优先）探索，并用启发式方法评估分支贡献
+
+#### (2.1.7.3) Self-Ask（自问自答）
+
+- **原理**：模型自己提出子问题并回答，逐步推导最终答案
+- **适用场景**：需要深入分析或创造性解决方案（如创意写作）
+- **对比**：优于直接提示和单纯 CoT，能处理复杂多跳问题
+
+#### (2.1.7.4) Plan-and-Execute
+
+- **流程**：用户请求 → 生成任务列表 → 执行任务（单任务 Agent）→ 更新状态 → 响应或重新规划更多任务
+
+#### (2.1.7.5) Thinking and Self-Reflection（思考与自我反思）
+
+- **流程**：Thought 1 → Action 1 → Thought 2 → Action 2 → ... → END，通过反思不断改进决策
+
+### 2.1.8 提示工程（Prompt Engineering）
 
 ![image-20250204225440045](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204225440045.png)
 
@@ -351,11 +591,37 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 
 ![image-20250204230855559](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204230855559.png)
 
-### 2.1.6 少量样本不会改变模型本身，但是fine-tuning会改变本身
+#### (2.1.8.1) Prompt 的四大结构
+
+| 组成部分 | 是否必选 | 内容举例 |
+| :--- | :--- | :--- |
+| **Context (上下文)** | 可选 | 角色设定（如"你是一名机器学习工程师"）、任务描述、背景知识 |
+| **Instruction (命令)** | **必选** | 操作步骤、思维链 (CoT)、示例 (Few-shot) |
+| **Input Data (输入数据)** | **必选** | 具体的句子、文章或问题 |
+| **Output Indicator (输出格式)** | 可选 | 指定输出类型（如 JSON、分类标签） |
+
+**示例**：
+> 你是一名机器学习工程师（**上下文**）。请根据以下输入对文本进行分类（**指令**）。输入：这部电影太棒了（**输入**）。输出：正面评价（**输出格式**）。
+
+#### (2.1.8.2) Prompt 存在的问题
+
+- **模型自身**：准确性、相关性、偏见性
+- **使用者**：缺乏系统性（依赖经验）、灵活性差（不好修改）、偏好分布差异、不同模型间不通用
+
+#### (2.1.8.3) 少样本学习 (Few-shot)
+
+通过少量示例让模型学会处理特定任务（区别于微调，不改变模型参数）。
+- 示例：用户问"你好吗？" → 答"帅哥，我很好"；问"今天周几？" → 答"帅哥，今天周日"；问"我放了别人鸽子" → 模型推理回答"帅哥，你真狗"
+
+#### (2.1.8.4) LangChain 提示模板 (Prompt Templates)
+
+- **基础模板**：`PromptTemplate(input_variables=[...], template="...")`
+- **部分变量 (Partial)**：可预先固定变量，或传入函数动态生成值（如当前时间）
+- **样本选择器 (ExampleSelector)**：样本太多时，使用**语义相似度筛选器**选取最相关示例，提升输出质量
 
 ![image-20250204231302023](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204231302023.png)
 
-### 2.1.7 各种器
+### 2.1.9 各种器
 
 ![image-20250204231629321](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250204231629321.png)
 
@@ -374,7 +640,7 @@ transformer架构让大模型有了自己的思想，让它可以回答问题。
 ![image-20250205143511524](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250205143511524.png)
 
 
-### 2.1.8 提示词
+### 2.1.10 提示词
 
 提示词起到对大模型进行清洗和筛选的作用。
 
@@ -424,7 +690,7 @@ print(filled_prompt)
 ```
 
 
-### 2.1.9 AI知识库类应用所产生的工作流
+### 2.1.11 AI知识库类应用所产生的工作流
 
 ![image-20250207145326563](C:\Users\hp\AppData\Roaming\Typora\typora-user-images\image-20250207145326563.png)
 
@@ -432,6 +698,21 @@ print(filled_prompt)
 
 
 ## 2.2 Langchain
+
+### 2.2.0 RAG 核心流程（本地数据 + LLM）
+
+非结构化数据 → **文本切分** → **文本块** → **Embedding（向量化）** → **向量数据库**
+用户问题 → **Embedding** → **相似性检索** → 相关内容块 + 用户问题 → **大模型** → 最终回答
+
+**关键组件与实现**：
+
+| 组件 | 功能 | LangChain 实现示例 |
+| :--- | :--- | :--- |
+| **文档加载器** | 从多种数据源加载文档 | `loader.load()` |
+| **文本转换器（分割器）** | 拆分为语义块，块间有重叠以保持连贯 | `RecursiveCharacterTextSplitter(chunk_size=100, chunk_overlap=20)` |
+| **文本 Embedding 模型** | 将非结构化文本转为浮点数列表（向量） | `OpenAIEmbeddings().embed_documents([text])` |
+| **向量存储站** | 存储和搜索 Embedding 数据 | `Chroma.from_documents(pages, OpenAIEmbeddings())` |
+| **检索器** | 根据非结构化查询返回相关文档 | `db.similarity_search(query)`（向量存储本身是一种检索器实现） |
 
 ### 2.2.1 链结构
 
@@ -1712,6 +1993,13 @@ $$\text{Attention}(Q, K, V) = \text{softmax}\left(\frac{QK^\mathsf{T}}{\sqrt{d_k
 - 整个流程没有"一次性"生成一句话，而是一步一步地"猜"出下一个最合适的词。
 
 通过这种方式，大模型能够生成连贯、符合上下文的自然语言文本。
+
+#### (6.2.1.1.1) Q/K/V 权重矩阵的深层理解
+
+- 输入序列通过三个权重矩阵（$W_Q, W_K, W_V$）映射为 Q、K、V 向量
+- **点积 (Dot Product)**：$Q \cdot K^T$ 的结果可看作衡量 Query 与 Key 之间"对齐"程度（相似度）的方法
+- **实际行为**：这些矩阵学到的模式非常复杂，难以直观解释，但模型能通过它们学习根据上下文改变语义的多种方式
+- **高级抽象**：理想情况下，模型能通过注意力机制从具体输入中提炼出更高级、更抽象的概念
 
 
 #### (6.2.1.2) 1 原向量要乘以一个矩阵才能得到查询(query)
