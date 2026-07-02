@@ -14,51 +14,56 @@
 
 ## 📂 目录结构
 
-```
-Note/
-├── AI/                            # 人工智能
-│   ├── 应用/                      # AI 应用
-│   │   ├── AI应用学习笔记.md      # AI 应用综合学习笔记
-│   │   ├── AI应用架构.md          # AI 应用架构设计
-│   │   ├── AI应用规划器.md        # AI 应用规划与设计思路
-│   │   ├── LangGraph指南.md       # LangGraph 详细使用指南
-│   │   ├── LangGraph框架.md       # LangGraph 框架概览
-│   │   ├── RAGAS评估.md           # RAGAS 评估框架
-│   │   ├── 多智能体扮演架构.md    # 多智能体协作架构
-│   │   ├── 工作流.md              # AI 工作流设计
-│   │   └── 思维链CoT.md           # Chain-of-Thought 推理策略
-│   └── 算法/                      # AI 算法与深度学习
-│       ├── FT-Transformer表格模型.md  # FT-Transformer 表格数据处理
-│       ├── GPT与Transformer.md    # GPT 与 Transformer 原理
-│       ├── Transformer架构.md     # Transformer 架构详解
-│       ├── 机器学习与大数据.md    # 机器学习与大数据基础
-│       ├── 消融实验与Baseline.md  # 实验方法论
-│       ├── 深度学习.md            # 深度学习与 PyTorch 实践
-│       └── 用户画像.md            # 用户画像构建方法
-├── 编程基础/                       # 数据结构与算法
-│   └── 算法与数据结构.md          # 算法竞赛与数据结构 (C++)
-├── 后端开发/                       # 后端技术栈
-│   └── 后端开发.md                # 爬虫/Python/Java/Spring Boot/微服务/Redis/Git
-├── 工程规范/                       # 项目规范
-│   └── 命名规范.md                # 编程命名、GitHub 协作与 AI 项目结构规范
-├── 杂记/                          # 杂项笔记
-│   ├── Clash与VPN详解.md         # 代理与 VPN 原理及使用
-│   └── 实用技巧.md                # 实用问题排查与技巧
-├── assets/
-│   └── images/                    # 笔记图片资源
-├── .gitignore
-└── README.md
-```
+### 🤖 AI 人工智能
+
+**应用**
+
+- [AI应用学习笔记](./AI/应用/AI应用学习笔记.md) — AI 应用综合学习笔记
+- [AI应用架构](./AI/应用/AI应用架构.md) — AI 应用架构设计
+- [AI应用规划器](./AI/应用/AI应用规划器.md) — AI 应用规划与设计思路
+- [LangGraph指南](./AI/应用/LangGraph指南.md) — LangGraph 详细使用指南
+- [LangGraph框架](./AI/应用/LangGraph框架.md) — LangGraph 框架概览
+- [RAGAS评估](./AI/应用/RAGAS评估.md) — RAGAS 评估框架
+- [多智能体扮演架构](./AI/应用/多智能体扮演架构.md) — 多智能体协作架构
+- [工作流](./AI/应用/工作流.md) — AI 工作流设计
+- [思维链CoT](./AI/应用/思维链CoT.md) — Chain-of-Thought 推理策略
+
+**算法**
+
+- [FT-Transformer表格模型](./AI/算法/FT-Transformer表格模型.md) — FT-Transformer 表格数据处理
+- [GPT与Transformer](./AI/算法/GPT与Transformer.md) — GPT 与 Transformer 原理
+- [Transformer架构](./AI/算法/Transformer架构.md) — Transformer 架构详解
+- [机器学习与大数据](./AI/算法/机器学习与大数据.md) — 机器学习与大数据基础
+- [消融实验与Baseline](./AI/算法/消融实验与Baseline.md) — 实验方法论
+- [深度学习](./AI/算法/深度学习.md) — 深度学习与 PyTorch 实践
+- [用户画像](./AI/算法/用户画像.md) — 用户画像构建方法
+
+### 💻 编程基础
+
+- [算法与数据结构](./编程基础/算法与数据结构.md) — 算法竞赛与数据结构 (C++)
+
+### 🔧 后端开发
+
+- [后端开发](./后端开发/后端开发.md) — 爬虫/Python/Java/Spring Boot/微服务/Redis/Git
+
+### 📏 工程规范
+
+- [命名规范](./工程规范/命名规范.md) — 编程命名、GitHub 协作与 AI 项目结构规范
+
+### 📝 杂记
+
+- [Clash与VPN详解](./杂记/Clash与VPN详解.md) — 代理与 VPN 原理及使用
+- [实用技巧](./杂记/实用技巧.md) — 实用问题排查与技巧
 
 ## 🌟 学习方向
 
 | 方向 | 核心内容 | 涉及笔记 |
 |------|----------|----------|
-| **AI 算法** | Transformer、深度学习、PyTorch、机器学习 | 深度学习、Transformer架构、GPT与Transformer、机器学习与大数据 |
-| **AI 应用** | Agent、RAG、LangChain、LangGraph、CoT | AI应用学习笔记、LangGraph指南、工作流、思维链CoT |
-| **后端开发** | Java/Spring Boot、微服务、Redis、MySQL | 后端开发 |
-| **编程基础** | 数据结构、算法、动态规划、图论 | 算法与数据结构 |
-| **工程规范** | 命名规范、项目结构、Git 协作 | 命名规范 |
+| **AI 算法** | Transformer、深度学习、PyTorch、机器学习 | [深度学习](./AI/算法/深度学习.md)、[Transformer架构](./AI/算法/Transformer架构.md)、[GPT与Transformer](./AI/算法/GPT与Transformer.md)、[机器学习与大数据](./AI/算法/机器学习与大数据.md) |
+| **AI 应用** | Agent、RAG、LangChain、LangGraph、CoT | [AI应用学习笔记](./AI/应用/AI应用学习笔记.md)、[LangGraph指南](./AI/应用/LangGraph指南.md)、[工作流](./AI/应用/工作流.md)、[思维链CoT](./AI/应用/思维链CoT.md) |
+| **后端开发** | Java/Spring Boot、微服务、Redis、MySQL | [后端开发](./后端开发/后端开发.md) |
+| **编程基础** | 数据结构、算法、动态规划、图论 | [算法与数据结构](./编程基础/算法与数据结构.md) |
+| **工程规范** | 命名规范、项目结构、Git 协作 | [命名规范](./工程规范/命名规范.md) |
 
 ## 🚀 关于本项目
 
