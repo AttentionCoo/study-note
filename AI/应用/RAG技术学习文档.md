@@ -8,11 +8,12 @@
 
 - [第一章：RAG 技术概述](#第一章rag-技术概述)
 - [第二章：整体架构设计](#第二章整体架构设计)
-- [第三章：知识底座 — 三层知识来源](#第三章知识底座--三层知识来源)
+- [第三章：知识底座 — 双层知识来源](#第三章知识底座--双层知识来源)
 - [第四章：文档预处理与向量化](#第四章文档预处理与向量化)
     - [4.4 Embedding 模型详解](#44-embedding-模型详解)
     - [4.5 向量库持久化架构](#45-向量库持久化架构)
     - [4.6 维度一致性保证](#46-维度一致性保证)
+    - [4.3 语义分块实验与结论](#43-语义分块实验与结论)
 - [第五章：三阶漏斗混合检索（核心）](#第五章三阶漏斗混合检索核心)
 - [第六章：QA 自动衍生引擎](#第六章qa-自动衍生引擎)
 - [第七章：RAG 管道 — 查询→检索→合成](#第七章rag-管道--查询检索合成)
@@ -21,9 +22,9 @@
     - [8.8 ConsensusEngine 共识引擎](#88-consensusengine--共识引擎详解)
     - [8.9 向量库运维指南](#89-向量库运维指南)
 - [第九章：LangGraph 工作流中的 RAG 集成](#第九章langgraph-工作流中的-rag-集成)
-- [第十章：PubMed 国际文献检索](#第十章pubmed-国际文献检索)
-- [第十一章：RAGAS 自动化评测](#第十一章ragas-自动化评测)
-- [第十二章：完整数据流与关键性能指标](#第十二章完整数据流与关键性能指标)
+- [第十章：RAGAS 自动化评测](#第十章ragas-自动化评测)
+    - [10.3 切分策略 A/B 对比评测](#103-切分策略-ab-对比评测)
+- [第十一章：完整数据流与关键性能指标](#第十一章完整数据流与关键性能指标)
 - [附录：核心文件索引](#附录核心文件索引)
 
 ---
@@ -48,7 +49,7 @@ RAG 的解决思路是：**在 LLM 生成答案之前，先从外部知识库中
 本项目 RAG 的核心公式：
   精准回答 = 三阶漏斗混合检索（高效召回） 
             + 共享记忆系统（跨会话学习） 
-            + 双重证据保障（权威教材 + PubMed）
+            + 双重证据保障（权威教材 + 共享记忆） 
             + 质量校验闭环（退火修正 + 信誉反馈）
 ```
 
@@ -58,7 +59,7 @@ RAG 的解决思路是：**在 LLM 生成答案之前，先从外部知识库中
 |:---|:---|:---|
 | 检索策略 | 单一向量检索 | 三阶漏斗（向量+BM25→RRF→Reranker） |
 | 记忆能力 | 无状态，每次独立检索 | 共享记忆系统，跨会话持久化 |
-| 证据来源 | 单一知识库 | 本地教材 + PubMed + 共享记忆 |
+| 证据来源 | 单一知识库 | 本地权威教材 + 共享记忆 |
 | 质量保障 | 无 | 退火校验 + 信誉反馈 + 反思循环 |
 | 容灾能力 | 单点故障 | 4模型容灾切换 + 三级优雅降级 |
 | 可追溯性 | 弱 | 每段证据附带来源+页码+相关度 |
@@ -75,11 +76,11 @@ RAG 的解决思路是：**在 LLM 生成答案之前，先从外部知识库中
 ├─────────────────────────────────────────────────────────────────────────┤
 │                                                                         │
 │  ┌──────────────────────┐        ┌──────────────────────────────────┐  │
-│  │    知识底座（3层）     │        │        检索管道（3阶段）           │  │
+│  │    知识底座（2层）     │        │        检索管道（3阶段）           │  │
 │  │                      │        │                                  │  │
 │  │ ① 本地教材PDF        │───────►│  查询生成 → 并行检索 → 证据合成    │  │
-│  │ ② PubMed国际文献     │        │                                  │  │
-│  │ ③ 共享记忆系统       │        └──────────────────────────────────┘  │
+│  │ ② 共享记忆系统       │        │                                  │  │
+│  │                      │        └──────────────────────────────────┘  │
 │  └──────────────────────┘                      │                        │
 │                                                ▼                        │
 │  ┌──────────────────────────────────────────────────────────────────┐  │
@@ -132,15 +133,13 @@ model/app/
 │   │   └── retrieval.py                   ← RerankResult / RetrievalDocument 数据模型
 │   └── core/
 │       └── shared_memory.py               ← 共享记忆系统（元记忆+存储+共识）
-├── config/
-│   └── shared_memory_config.yaml          ← 共享记忆系统配置
-└── services/
-    └── pubmed_service.py                  ← PubMed 国际文献检索
+└── config/
+    └── shared_memory_config.yaml          ← 共享记忆系统配置
 ```
 
 ---
 
-## 第三章：知识底座 — 三层知识来源
+## 第三章：知识底座 — 双层知识来源
 
 ### 3.1 第一层：本地权威教材 PDF
 
@@ -175,42 +174,7 @@ splitter = RecursiveCharacterTextSplitter(
 - `chunk_overlap=128`：25% 重叠率，确保跨 chunk 边界的信息不会丢失
 - 分隔符优先级：段落 → 句子 → 分句 → 行 → 词，尽可能在语义边界切分
 
-### 3.2 第二层：PubMed 国际文献检索
-
-**作用**：作为循证医学扩展，提供最新国际研究进展，与本地知识库形成互补。
-
-**技术实现**：
-
-```
-用户查询 → esearch（按相关性排序返回PMID列表）
-         → efetch（批量获取文献详细信息）
-         → 8级证据等级排序
-         → 返回摘要
-```
-
-**8 级证据等级**（从高到低）：
-
-| 等级 | 文献类型 | 证据强度 |
-|:---:|:---|:---:|
-| 1 | Practice Guideline（实践指南） | ★★★★★ |
-| 2 | Guideline（指南） | ★★★★★ |
-| 3 | Meta-Analysis（荟萃分析） | ★★★★☆ |
-| 4 | Systematic Review（系统综述） | ★★★★☆ |
-| 5 | RCT（随机对照试验） | ★★★☆☆ |
-| 6 | Clinical Trial（临床试验） | ★★★☆☆ |
-| 7 | Review（综述） | ★★☆☆☆ |
-| 8 | Case Reports（病例报告） | ★☆☆☆☆ |
-
-**与本地 RAG 的互补关系**：
-
-| 维度 | 本地知识库(RAG) | PubMed |
-|:---|:---|:---|
-| 知识类型 | 权威教材、临床指南 | 最新研究论文 |
-| 时效性 | 相对稳定 | 持续更新 |
-| 溯源精度 | 精确到页码 | 精确到文献 |
-| 适用场景 | 基础知识学习 | 前沿进展了解 |
-
-### 3.3 第三层：共享记忆系统
+### 3.2 第二层：共享记忆系统
 
 **作用**：跨会话保留多智能体推理中产生的高价值洞察，使 RAG 具备"学习记忆"能力。
 
@@ -296,7 +260,73 @@ build_or_load_vectorstore():
 
 **关键设计决策**：向量库只在首次启动时构建，后续启动直接加载已有数据，避免重复计算。
 
+### 4.3 切分策略选型实验
+
+#### 背景
+
+在项目初期，我们评估了两种文档切分策略：
+
+| 策略 | 原理 | 优势 | 劣势 |
+|:---|:---|:---|:---|
+| **递归字符切分** (RecursiveCharacterTextSplitter) | 按分隔符优先级（`\n\n` → `。` → `；` → `\n` → ` `）递归拆分，限制 `chunk_size=512, overlap=128` | 快速、稳定、可预测 | 可能在语义不自然的位置截断 |
+| **语义分块** (Semantic Chunking) | 用 Embedding 计算相邻句子余弦相似度，在"语义断崖"处切分 | 块内主题高度一致 | 计算成本高、对术语密集文本的阈值敏感 |
+
+#### 实验设计
+
+使用讯飞星火 `text-embedding-v2` + `xf-xinghuo-plus`，在 12 份医学 PDF（259 页，涵盖脑卒中诊疗指南、专家共识等）上进行 **RAGAS 评测框架** 的 A/B 对比。
+
+**语义分块 V1 参数**（第一轮）：
+- `similarity_threshold=0.75`（相邻句子余弦相似度 < 0.75 则在此切分）
+- `min_chunk_size=100, max_chunk_size=800`
+- 无重叠、使用 `clean_text`（去除换行）
+
+**语义分块 V2 参数**（调优轮）：
+- `similarity_threshold=0.80`（升高阈值减少假断点）
+- `overlap_ratio=0.25`（句子级 25% 重叠）
+- 使用 `clean_text_preserve_nl`（保留换行作为段落边界信号）
+
+#### V1 实验结果 (threshold=0.75, 无overlap)
+
+| 指标 | 递归切分 | 语义分块 | 差值 | 胜出 |
+|:---|:---|:---|:---|:---|
+| Context Precision（上下文精准度） | **0.5000** | 0.2667 | -0.2333 | 递归 |
+| Context Recall（上下文召回率） | **0.3783** | 0.3200 | -0.0583 | 递归 |
+| Faithfulness（事实一致性） | **0.5961** | 0.5787 | -0.0174 | 递归 |
+| Answer Relevancy（回答相关性） | 0.9353 | 0.9319 | -0.0034 | ≈ 持平 |
+| 平均检索耗时 | 1822ms | 1892ms | +70ms | ≈ 持平 |
+
+**结论：语义分块在 Context Precision 上暴跌 47%（0.50→0.27），全面落败。**
+
+#### V2 实验结果 (threshold=0.80, overlap=0.25, 保留换行)
+
+| 指标 | 递归切分 | 语义分块 | 差值 | 胜出 |
+|:---|:---|:---|:---|:---|
+| Context Precision（上下文精准度） | **0.2000** | 0.1250 | -0.0750 | 递归 |
+| Context Recall（上下文召回率） | **0.4617** | 0.2783 | -0.1833 | 递归 |
+| Faithfulness（事实一致性） | **0.6342** | 0.6174 | -0.0168 | 递归 |
+| Answer Relevancy（回答相关性） | 0.9307 | 0.9395 | +0.0088 | ≈ 持平 |
+| 平均检索耗时 | 1788ms | 2781ms | +993ms | 递归 |
+
+**结论：调优后非但没有改进，反而因为保留换行导致语义块数量从 1070 暴增到 3313（3 倍膨胀），Precision 和 Recall 进一步恶化。**
+
+#### 失败原因分析
+
+1. **医学文本术语密度过高**。一段讲"溶栓"的句子和一段讲"抗血小板"的句子，虽然主题不同，但共享大量医学术语（"脑卒中""缺血性""治疗"），余弦相似度天然偏高。语义分块很难在这一片"术语噪声"中准确识别主题边界。
+
+2. **`clean_text` 破坏了文档结构**。原始流程去除所有换行，段落边界完全消失。后续尝试保留换行（V2），却将标题 (`一、病因\n`) 等短文本切分为独立句子，导致块数失控。
+
+3. **递归切分的重叠是意外优势**。`chunk_overlap=128`（25%）意味着相邻 chunk 共享内容，检索时宽容度更高。语义分块若不加 overlap，在边界处严格割裂信息；加 overlap 后（V2）又因"句子"定义过于碎片化而适得其反。
+
+#### 最终结论
+
+**本项目采用递归字符切分作为默认策略**（`chunk_size=512, overlap=128`），不启用语义分块。
+
+这并不意味着语义分块本身是坏方案——在主题切换缓慢、术语多样性高的通用文本上它通常优于固定切分。但在术语高度密集、主题快速切换的医学教材数据集上，**简单的递归切分反而更鲁棒**。
+
+> 语义分块的完整实现保留在 `data_loader.py` 中（`_semantic_split()` 函数），可通过传入 `embeddings` 参数启用。评测脚本位于 `tests/compare_chunking.py`，支持一键对比。
+
 ---
+
 ### 4.4 Embedding 模型详解
 
 向量化的核心是 Embedding 模型。本项目采用 **双通道 Embedding 引擎**（XfyunEmbeddings），实现了云端 API 与本地模型的无缝切换。
@@ -554,9 +584,9 @@ def reciprocal_rank_fusion(vector_results, bm25_results, k=60, top_k=20):
 class BGEReranker:
     def __init__(self):
         self.candidate_models = [
-            "qwen-rerank-v1",    # 首选
+            "xf-xinghuo-rerank-v1",    # 首选
             "gte-rerank-v2",     # 备选1
-            "qwen-rerank",       # 备选2
+            "xf-xinghuo-rerank",       # 备选2
             "gte-rerank"         # 备选3
         ]
 
@@ -628,7 +658,7 @@ if cache_key in self._cache:
    日志: "{len(v_docs)+len(b_docs)} 篇 → {len(coarse_candidates)} 篇候选"
 
 3. 第三阶 · Reranker 精排 (Fine Ranking):
-   FOR model IN [qwen-rerank-v1, gte-rerank-v2, qwen-rerank, gte-rerank]:
+   FOR model IN [xf-xinghuo-rerank-v1, gte-rerank-v2, xf-xinghuo-rerank, gte-rerank]:
      TRY: result ← DashScope.TextReRank(model, query, coarse_candidates, top_n=3)
           IF result.status == OK: RETURN result
      CATCH AccessDenied / Exception: CONTINUE
@@ -660,7 +690,7 @@ if cache_key in self._cache:
 
 ```python
 class QAGenerator:
-    def __init__(self, model_name="qwen-turbo"):
+    def __init__(self, model_name="xf-xinghuo-turbo"):
         self.llm = ChatOpenAI(
             model=model_name,
             api_key=os.getenv("DASHSCOPE_API_KEY"),
@@ -990,6 +1020,7 @@ persistence:
 ```
 
 ---
+
 ### 8.7 AgentReputationStore — 信誉存储详解
 
 追踪每个 Agent 的信誉分数，以 JSON 文件持久化到磁盘。
@@ -1105,7 +1136,6 @@ rm -rf model/data/vector_stores/chroma_db_*  # 维度变了，必须重建
 | 运行时静默"假死" | BGE 首次下载约 3 分钟无日志 | main.py 启动时 `preload_fallback()` |
 | ChromaDB 初始化失败 | `__call__(texts)` 参数名不匹配 | 改为 `__call__(input)` 兼容接口 |
 
-
 ## 第九章：LangGraph 工作流中的 RAG 集成
 
 ### 9.1 工作流拓扑
@@ -1176,48 +1206,7 @@ IntentNode (意图分类 + 难度评分)
 
 ---
 
-## 第十章：PubMed 国际文献检索
-
-### 10.1 与本地 RAG 的协作关系
-
-```
-用户医学问题
-    │
-    ├──► 本地 RAG (三阶漏斗) → 权威教材精准溯源
-    │
-    └──► PubMed 检索 → 最新国际研究进展
-            │
-            ▼
-    双重证据合并 → 注入 LLM 上下文
-```
-
-### 10.2 检索流程
-
-```
-esearch(query) → 返回 PMID 列表（按相关性排序）
-    │
-    ▼
-efetch(PMID列表) → 返回文献详细信息（标题、摘要、作者、期刊等）
-    │
-    ▼
-8级证据等级排序 → 高等级证据优先
-    │
-    ▼
-格式化输出 → 注入证据上下文
-```
-
-### 10.3 异常容错
-
-| 异常类型 | 处理方式 |
-|:---|:---|
-| HTTP 状态码异常 | 捕获后优雅降级，返回空结果 |
-| 请求超时 | 设置 timeout 参数，超时后降级 |
-| XML 解析失败 | 捕获异常，返回空结果 |
-| API Key 不可用 | 降级为无 Key 模式（速率限制 3次/秒） |
-
----
-
-## 第十一章：RAGAS 自动化评测
+## 第十章：RAGAS 自动化评测
 
 ### 11.1 评测维度
 
@@ -1235,9 +1224,37 @@ efetch(PMID列表) → 返回文献详细信息（标题、摘要、作者、期
 - 自动化测试用例：**71 条**（黑盒 33 + 白盒 38），通过率 100%
 - 白盒路径覆盖率：**100%**（核心模块路径覆盖 + 共享记忆系统 + RAG + 迁移验证）
 
+### 11.3 切分策略 A/B 对比评测
+
+我们开发了专门的 RAGAS 对比评测脚本，用于在相同数据集上公平比较不同切分策略的效果。
+
+**评测脚本**：`tests/compare_chunking.py`
+
+**用法**：
+```bash
+# 首次运行（构建两套向量库 + RAGAS 评估）
+python -m tests.compare_chunking --force-rebuild --output ragas_report.json
+
+# 后续仅评测（向量库已构建）
+python -m tests.compare_chunking --skip-build
+```
+
+**评测数据集**：10 道医学问题，覆盖病因、诊断、治疗、药物、指南等多个维度。
+
+**实测评测结果（2026-07-05）**：
+
+| 指标 | 递归切分 | 语义分块 | 胜出 |
+|:---|:---|:---|:---|
+| Context Precision | 0.5000 | 0.2667 | 递归 |
+| Context Recall | 0.3783 | 0.3200 | 递归 |
+| Faithfulness | 0.5961 | 0.5787 | 递归 |
+| Answer Relevancy | 0.9353 | 0.9319 | ≈ 持平 |
+
+> 详细分析和失败原因见[第四章 §4.3 切分策略选型实验](#43-切分策略选型实验)。
+
 ---
 
-## 第十二章：完整数据流与关键性能指标
+## 第十一章：完整数据流与关键性能指标
 
 ### 12.1 完整数据流
 
@@ -1310,7 +1327,7 @@ efetch(PMID列表) → 返回文献详细信息（标题、摘要、作者、期
 | [shared_memory_config.yaml](file:///D:/CompetitionProject/learning-multi-agent-system/model/app/config/shared_memory_config.yaml) | 共享记忆系统配置 | 熵值阈值、共识参数、持久化策略 |
 | [assistant.py](file:///D:/CompetitionProject/learning-multi-agent-system/model/app/agents/assistant.py) | 学习助手（快速通道） | `LearningAssistant`, `RAGPipeline` 集成 |
 | [test_rag.py](file:///D:/CompetitionProject/learning-multi-agent-system/model/tests/test_rag.py) | RAG检索功能测试 | 3个医学测试问题 |
-| [pubmed_service.py](file:///D:/CompetitionProject/learning-multi-agent-system/model/app/services/pubmed_service.py) | PubMed文献检索 | esearch + efetch 两步检索 |
+| [compare_chunking.py](file:///D:/CompetitionProject/learning-multi-agent-system/model/tests/compare_chunking.py) | RAGAS切分策略A/B对比评测 | 10题 × 2策略 × 4指标 |
 
 ---
 
