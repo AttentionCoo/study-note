@@ -1331,6 +1331,57 @@ python -m tests.compare_chunking --skip-build
 
 ---
 
-> **文档版本**：v2.0
-> **最后更新**：2026-07-15
+## 第十二章：相关子文档索引
+
+以下子文档对本 RAG 体系中的特定主题做了更深入的展开，可作为按需查阅的补充材料：
+
+### 12.1 《向量存储持久化：从原理到工程实践》
+
+**聚焦**：ChromaDB 持久化的底层实现细节、测试体系与常见问题排障。
+
+| 主题 | 核心要点 |
+|:---|:---|
+| 双库分离策略 | 主知识库（chroma_db_unified）与共享记忆库（chroma_db_shared_memory）独立管理 |
+| BGE 模型类级缓存 | `_fallback_embeddings_cache` 类变量，第二次实例化从 185 秒降至 0 秒 |
+| 持久化目录结构 | chroma.sqlite3 元数据 + HNSW 图文件（data_level0.bin / link_lists.bin） |
+| 测试体系 | 构建/加载/跨会话/维度一致性/元记忆过滤 5 项专项测试 |
+| 常见问题 | ChromaDB 接口不匹配、BGE 重复加载、维度冲突、Windows 文件锁 |
+
+### 12.2 《嵌入向量存储指南：从概念到运维》
+
+**聚焦**：Embedding 维度冲突的根因分析与修复方案。
+
+| 主题 | 核心要点 |
+|:---|:---|
+| 维度冲突根因 | XfyunEmbeddings 自动降级导致 2560d → 1024d → 384d 的维度漂移 |
+| `_ChromaEmbeddingFunction` 包装器 | 将 XfyunEmbeddings 适配为 ChromaDB 兼容接口，确保降级路径也产出正确维度 |
+| 显式传入 embedding_function | `get_or_create_collection(embedding_function=...)` 避免 ChromaDB 使用默认 ONNX 384d |
+| 维度排查口诀 | 看到 "dimension does not match" → 确认模型 → 删库 → 重建 |
+| 生产环境推荐 | `XFYUN_EMBEDDING_ENABLED=false`，全程使用 BGE 1024d，避免免费档 QPS=2 限制 |
+
+### 12.3 《共享记忆系统 — 修改优势总结》
+
+**聚焦**：三大核心机制（物理存储 / 逻辑共识 / 元记忆过滤）的设计优势与全链路集成。
+
+| 层次 | 机制 | 核心优势 |
+|:---|:---|:---|
+| 物理层 | `SharedMemoryStore` | 语义检索、三级优雅降级（向量→关键词→跳过）、零侵入集成 |
+| 逻辑层 | `ConsensusEngine` + `AgentReputationStore` | 信誉加权投票（非简单多数决）、跨会话 JSON 持久化、精细化责任定位 |
+| 元记忆过滤 | `MetaMemoryFilter` | 四维熵值评分（Shannon + 关键词密度 + Token 密度 + 长度）、领域关键词库定制化 |
+
+**全链路数据流闭环**：
+
+```
+用户提问 → retrieve_node（物理层读取）→ reason_node（冲突检测+共识投票+高价值存储）
+→ validate_node（信誉更新反馈）→ 下一轮优化
+```
+
+### 12.4 《RAG技术实战详解》
+
+**与本文档的关系**：两者内容高度重叠，本文档为最新版本，涵盖更完整的三阶漏斗、PubMed 证据等级、RAGAS 评测等。实战详解版保留作为历史参考，其中"三层知识来源"（本地教材 + PubMed + 共享记忆）的视角可作为补充阅读。
+
+---
+
+> **文档版本**：v2.1
+> **最后更新**：2026-07-17
 > **适用项目**：LearnAgent — 基于大模型的个性化资源生成与学习多智能体系统
